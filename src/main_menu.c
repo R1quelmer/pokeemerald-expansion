@@ -566,6 +566,11 @@ static void VBlankCB_MainMenu(void)
 
 void CB2_InitMainMenu(void)
 {
+#if defined(FIRERED) && defined(VISUAL_QA)
+    extern bool8 TryInitFireRedVisualQA(void);
+    if (TryInitFireRedVisualQA())
+        return;
+#endif
     InitMainMenu(FALSE);
 }
 

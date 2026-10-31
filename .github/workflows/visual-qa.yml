@@ -1,0 +1,32 @@
+name: FireRed visual QA
+on:
+  push:
+    branches: [feat/firered-hack-base]
+    paths: ['src/**', 'include/**', 'graphics/**', 'tools/**', 'Makefile', '.github/workflows/visual-qa.yml']
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build and emulator dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi libpng-dev libmgba-dev python3-pil
+      - name: Validate and build isolated QA ROM
+        run: |
+          python3 tools/generate_firered_battle_ui.py
+          git diff --exit-code -- graphics/battle_interface/firered
+          make clean
+          make firered -j$(nproc) VISUAL_QA=1
+      - name: Capture actual emulated screens
+        run: |
+          cc tools/visual_qa/capture.c -o /tmp/firered-capture -lmgba
+          mkdir -p visual-qa
+          address=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gVisualQaScene" {print $1}')
+          test -n "$address"
+          /tmp/firered-capture pokefirered.gba visual-qa "$address"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firered-visual-qa-screenshots
+          path: visual-qa/*.png
+          if-no-files-found: error
