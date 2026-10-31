@@ -22,7 +22,8 @@ def save_image(name, image, palette=None):
 
 def save_palette(name, colors):
     (DEST / (name + ".pal")).write_text(
-        "JASC-PAL\n0100\n16\n" + "\n".join("%d %d %d" % c for c in colors) + "\n")
+        "JASC-PAL\n0100\n16\n" + "\n".join("%d %d %d" % c for c in colors) + "\n",
+        newline="\n")
 
 
 # 12..15 are the four battlers' runtime status colors. 9/10 are gender,
