@@ -11,7 +11,7 @@ RED=(192,40,64); BLUE=(48,168,224); VIOLET=(112,80,184)
 AMBER=(232,160,40); GREEN=(48,192,112)
 
 def palette(path, colors):
-    path.write_text('JASC-PAL\n0100\n16\n'+'\n'.join('%d %d %d'%c for c in colors)+'\n',newline='\n')
+    path.write_text('JASC-PAL\n0100\n'+str(len(colors))+'\n'+'\n'.join('%d %d %d'%c for c in colors)+'\n',newline='\n')
 
 def save(path, im, colors):
     im.putpalette([v for c in colors for v in c]+[0]*(768-3*len(colors)))
@@ -82,6 +82,62 @@ def storage_shell():
            PAPER,BLUE,(24,96,136),BLUE,INK,BLUE,INK]
     palette(OUT/'storage_party.pal',party)
 
+def summary_panels():
+    # Preserve the original 240 dynamic tiles: pagination, status, EXP, move
+    # details and IV/EV labels are addressed by the controller at fixed IDs.
+    base=Image.open(ROOT/'graphics/summary_screen/tiles.png')
+    original_palette=base.getpalette()
+    colors=[]
+    for bank,accent in enumerate([RED,GREEN,BLUE,VIOLET,RED,AMBER]):
+        cols=[tuple(original_palette[i:i+3]) for i in range(bank*48,(bank+1)*48,3)]
+        cols[1:7]=[INK,PAPER,MUTED,PAPER,PAPER,MUTED]
+        cols[7:16]=[accent,accent,accent,accent,accent,PAPER,MUTED,MUTED,INK]
+        if bank==4: # Pagination symbols retain their contrast roles.
+            cols[2:10]=[RED,MUTED,PAPER,PAPER,MUTED,INK,PAPER,MUTED]
+        colors.extend(cols)
+    colors.extend([PAPER,INK,PAPER,INK,PAPER,RED,PAPER,BLUE,PAPER,RED,PAPER,
+                   BLUE,PAPER,RED,PAPER,INK])
+    colors.extend([PAPER,INK,PAPER,INK,PAPER,RED,PAPER,AMBER,INK,INK,PAPER,
+                   INK,PAPER,RED,INK,PAPER])
+    palette(OUT/'summary.pal',colors)
+    extra=[];ids={}
+    page_banks={'info':0,'info_egg':0,'skills':2,'battle_moves':3,'contest_moves':1}
+    for name,bank in page_banks.items():
+        raw=(ROOT/f'graphics/summary_screen/page_{name}.bin').read_bytes()
+        tm=list(struct.unpack('<1024H',raw));old=tm.copy()
+        canvas=Image.new('P',(256,160),3);d=ImageDraw.Draw(canvas)
+        d.rectangle((0,0,239,159),fill=2)
+        d.line((0,15,239,15),fill=7,width=2)
+        d.polygon([(0,16),(75,16),(79,20),(79,159),(0,159)],fill=3)
+        d.polygon([(4,19),(71,19),(75,23),(75,153),(4,153)],fill=2)
+        d.rectangle((0,18,2,159),fill=7)
+        d.line((80,16,80,159),fill=1)
+        headers=[24,64,104] if name.startswith('info') else ([24,48,104] if name=='skills' else [24,112])
+        for y in headers:
+            bottom=(63 if y==24 else 103 if y==64 else 159) if name.startswith('info') else (47 if y==24 else 103 if y==48 else 159)
+            if 'moves' in name:bottom=95 if y==24 else 159
+            d.polygon([(84,y),(235,y),(239,y+4),(239,bottom),(83,bottom),(83,y+1)],fill=1)
+            d.rectangle((85,y+8,237,bottom-1),fill=2)
+            d.line((85,y+1,234,y+1),fill=7)
+        for y in range(20):
+            for x in range(30):
+                if not name.startswith('info') and (x<10 or y<2):continue
+                tile=canvas.crop((x*8,y*8,x*8+8,y*8+8));key=tile.tobytes()
+                if key not in ids:ids[key]=240+len(extra);extra.append(tile)
+                tm[y*32+x]=ids[key]|bank<<12
+        # Keep the authored bitmap labels, including their original glyph masks.
+        rows=[3,8,13] if name.startswith('info') else ([3,6,13] if name=='skills' else [3,14])
+        for y in rows:
+            tm[y*32+10:y*32+30]=old[y*32+10:y*32+30]
+        (OUT/f'summary_{name}.bin').write_bytes(struct.pack('<1024H',*tm))
+    count=240+len(extra)
+    assert ((count+15)//16)*16 < 576, 'Summary atlas would overlap BG screenblocks'
+    for source,target in [('tiles','summary_tiles'),('iv_ev_tiles','summary_iv_ev_tiles')]:
+        original=Image.open(ROOT/f'graphics/summary_screen/{source}.png').point(lambda p:p&15)
+        atlas=Image.new('P',(128,((count+15)//16)*8),0);atlas.paste(original,(0,0))
+        for i,tile in enumerate(extra,240):atlas.paste(tile,(i%16*8,i//16*8))
+        save(OUT/f'{target}.png',atlas,colors[:16])
+
 def main():
     frames=OUT/'frames';frames.mkdir(parents=True,exist_ok=True)
     colors=[(0,0,0),PAPER,INK,MUTED,RED,(248,144,160),GREEN,(152,224,184),
@@ -138,6 +194,7 @@ def main():
     palette(OUT/'options_text.pal',option)
     bag_background()
     storage_shell()
+    summary_panels()
     party_colors=[(0,0,0),(40,40,48),(32,32,40),PAPER,INK,RED,MUTED,
                   (40,40,48),(40,40,48),GREEN,(112,232,152),BLUE,
                   (144,208,240),RED,(248,144,160),PAPER]

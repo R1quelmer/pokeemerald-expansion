@@ -50,6 +50,16 @@ def main():
         for tile, color in [(11, 3), (17, 1), (23, 3), (43, 4)]:
             x, y = tile % 16 * 8, tile // 16 * 8
             assert set(atlas.crop((x, y, x + 8, y + 8)).tobytes()) == {color}, tile
+    for original, generated in [('tiles', 'summary_tiles'), ('iv_ev_tiles', 'summary_iv_ev_tiles')]:
+        with Image.open(root / f'graphics/summary_screen/{original}.png') as before, Image.open(folder / f'{generated}.png') as after:
+            assert after.width * after.height // 64 < 576, generated
+            assert after.crop((0, 0, 128, 120)).tobytes() == bytes(p & 15 for p in before.tobytes()), generated + ': fixed controller tiles changed'
+    for page in ['info', 'info_egg', 'skills', 'battle_moves', 'contest_moves']:
+        data = (folder / f'summary_{page}.bin').read_bytes()
+        assert len(data) == 2048, page
+        with Image.open(folder / 'summary_tiles.png') as atlas:
+            count = atlas.width * atlas.height // 64
+        assert all((tile & 1023) < count for tile in struct.unpack('<1024H', data)), page
     print('FireRed UI pixels, palettes, tilemaps and runtime tile reservations verified')
 
 

@@ -1784,6 +1784,19 @@ const u16 gMoveTypes_Pal[] = INCBIN_U16("graphics/types/move_types.gbapal");
 const u32 gSummaryMoveSelect_Gfx[] = INCGFX_U32("graphics/summary_screen/move_select.png", ".4bpp.smol");
 const u16 gSummaryMoveSelect_Pal[] = INCGFX_U16("graphics/summary_screen/move_select.png", ".gbapal");
 
+#ifdef FIRERED
+#if P_SUMMARY_SCREEN_IV_EV_TILESET
+const u32 gSummaryScreen_Gfx[] = INCGFX_U32("graphics/ui/firered/summary_iv_ev_tiles.png", ".4bpp.smol");
+#else
+const u32 gSummaryScreen_Gfx[] = INCGFX_U32("graphics/ui/firered/summary_tiles.png", ".4bpp.smol");
+#endif
+const u16 gSummaryScreen_Pal[] = INCGFX_U16("graphics/ui/firered/summary.pal", ".gbapal");
+const u32 gSummaryPage_Info_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_info.bin", ".smolTM");
+const u32 gSummaryPage_Skills_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_skills.bin", ".smolTM");
+const u32 gSummaryPage_BattleMoves_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_battle_moves.bin", ".smolTM");
+const u32 gSummaryPage_ContestMoves_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_contest_moves.bin", ".smolTM");
+const u32 gSummaryPage_InfoEgg_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_info_egg.bin", ".smolTM");
+#else
 #if P_SUMMARY_SCREEN_IV_EV_TILESET
 const u32 gSummaryScreen_Gfx[]                = INCGFX_U32("graphics/summary_screen/iv_ev_tiles.png", ".4bpp.smol");
 #else
@@ -1795,6 +1808,7 @@ const u32 gSummaryPage_Skills_Tilemap[]       = INCGFX_U32("graphics/summary_scr
 const u32 gSummaryPage_BattleMoves_Tilemap[]  = INCGFX_U32("graphics/summary_screen/page_battle_moves.bin", ".smolTM");
 const u32 gSummaryPage_ContestMoves_Tilemap[] = INCGFX_U32("graphics/summary_screen/page_contest_moves.bin", ".smolTM");
 const u32 gSummaryPage_InfoEgg_Tilemap[]      = INCGFX_U32("graphics/summary_screen/page_info_egg.bin", ".smolTM");
+#endif
 
 const u32 gBagMaleTiles[] = INCGFX_U32("graphics/bag/bag_male.png", ".4bpp.smol");
 const u32 gBagFemaleTiles[] = INCGFX_U32("graphics/bag/bag_female.png", ".4bpp.smol");
