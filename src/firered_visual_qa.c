@@ -21,6 +21,7 @@
 #include "constants/pokedex.h"
 
 EWRAM_DATA u8 gVisualQaScene = 0;
+EWRAM_DATA volatile u32 gVisualQaProgress = 0;
 static bool8 sPrepared;
 
 static void ReturnFromVisualQA(void)
@@ -34,8 +35,14 @@ bool8 TryInitFireRedVisualQA(void)
     if (sPrepared || gVisualQaScene == 0)
         return FALSE;
     sPrepared = TRUE;
+    u8 scene = gVisualQaScene;
+    gVisualQaProgress = 10;
+    SetVBlankCallback(NULL);
+    SetHBlankCallback(NULL);
     Sav2_ClearSetDefault();
+    gVisualQaProgress = 11;
     NewGameInitData();
+    gVisualQaProgress = 12;
     StringCopy(gSaveBlock2Ptr->playerName, COMPOUND_STRING("RED"));
     StringCopy(gSaveBlock1Ptr->rivalName, COMPOUND_STRING("BLUE"));
     const enum Species species[] = {SPECIES_TREECKO, SPECIES_TOTODILE,
@@ -47,13 +54,17 @@ bool8 TryInitFireRedVisualQA(void)
         GetSetPokedexFlag(SpeciesToNationalPokedexNum(species[i]), FLAG_SET_CAUGHT);
     }
     gPartiesCount[B_TRAINER_PLAYER] = PARTY_SIZE;
+    gVisualQaProgress = 13;
     AddBagItem(ITEM_POTION, 12);
     AddBagItem(ITEM_POKE_BALL, 20);
     AddBagItem(ITEM_RARE_CANDY, 3);
     AddBagItem(ITEM_MEGA_RING, 1);
     FlagSet(FLAG_SYS_POKEDEX_GET);
+    gVisualQaProgress = 14;
     gMain.savedCallback = ReturnFromVisualQA;
-    switch (gVisualQaScene)
+    gVisualQaScene = scene | 0x80;
+    gVisualQaProgress = 20 + scene;
+    switch (scene)
     {
     case 1: SetMainCallback2(CB2_InitOptionMenu); break;
     case 2: SetMainCallback2(CB2_PartyMenuFromStartMenu); break;
