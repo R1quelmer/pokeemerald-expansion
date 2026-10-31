@@ -11,9 +11,9 @@ and inspected; this document does not claim that they are redesigned.
 | --- | --- | --- |
 | Battle and intro | battle_bg.c, battle_interface.c, battle_controller_oak_old_man.c; graphics/battle_interface/firered | First-battle fix prepared; emulator review pending |
 | Title | title_screen_frlg.c; graphics/title_screen_frlg/firered | Audit complete; design pending |
-| Continue/New Game | main_menu.c; graphics/interface/main_menu_* | Audit complete; redesign pending |
+| Continue/New Game | main_menu.c; graphics/ui/firered/main_* | New composition prepared; runtime review pending |
 | Pause/save | start_menu.c; shared text_window.c frames | Audit complete; redesign pending |
-| Options | option_menu.c; graphics/interface/option_menu_* | Audit complete; redesign pending |
+| Options | option_menu.c; graphics/ui/firered/options_text.pal | Header, row dividers and accents prepared; runtime review pending |
 | Party | party_menu.c, data/party_menu.h; graphics/party_menu | Audit complete; redesign pending |
 | Summary | pokemon_summary_screen.c; graphics/summary_screen | Audit complete; redesign pending |
 | Bag | item_menu.c; graphics/bag | Audit complete; redesign pending |
@@ -21,7 +21,7 @@ and inspected; this document does not claim that they are redesigned.
 | Trainer Card | trainer_card.c; graphics/trainer_card/frlg | FRLG-specific implementation; redesign pending |
 | Naming | naming_screen.c; graphics/naming_screen | Shared controller; redesign pending |
 | PC/storage | pokemon_storage_system.c; graphics/pokemon_storage | Shared controller; redesign pending |
-| Messages/signs/shop | text_window.c, field_message_box.c, shop.c | Shared frames/palettes; redesign pending |
+| Messages/signs/shop | text_window.c, field_message_box.c, shop.c | FireRed geometric frames prepared; runtime review pending |
 | Overworld | data/maps, data/layouts, data/tilesets, graphics/tilesets | Prototype pending UI consolidation |
 
 Except for explicitly selected FRLG resources (title/card/maps), controllers

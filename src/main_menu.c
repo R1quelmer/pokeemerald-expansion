@@ -423,8 +423,15 @@ static const struct WindowTemplate sNewGameBirchSpeechTextWindows[] =
     DUMMY_WIN_TEMPLATE
 };
 
+#ifdef FIRERED
+static const u16 sMainMenuBgPal[] = INCGFX_U16("graphics/ui/firered/main_background.pal", ".gbapal");
+static const u16 sMainMenuTextPal[] = INCGFX_U16("graphics/ui/firered/main_text.pal", ".gbapal");
+static const u32 sFireRedMenuBgTiles[] = INCGFX_U32("graphics/ui/firered/main_background.png", ".4bpp.smol");
+static const u32 sFireRedMenuBgMap[] = INCGFX_U32("graphics/ui/firered/main_background.bin", ".smolTM");
+#else
 static const u16 sMainMenuBgPal[] = INCGFX_U16("graphics/interface/main_menu_bg.pal", ".gbapal");
 static const u16 sMainMenuTextPal[] = INCGFX_U16("graphics/interface/main_menu_text.pal", ".gbapal");
+#endif
 
 static const u8 sTextColor_Headers[] = {TEXT_DYNAMIC_COLOR_1, TEXT_DYNAMIC_COLOR_2, TEXT_DYNAMIC_COLOR_3};
 static const u8 sTextColor_MenuInfo[] = {TEXT_DYNAMIC_COLOR_1, TEXT_COLOR_WHITE, TEXT_DYNAMIC_COLOR_3};
@@ -633,6 +640,11 @@ static u32 InitMainMenu(bool8 returningFromOptionsMenu)
     SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
     ShowBg(0);
     HideBg(1);
+#ifdef FIRERED
+    DecompressAndLoadBgGfxUsingHeap(1, sFireRedMenuBgTiles, 0, 0, 0);
+    DecompressAndLoadBgGfxUsingHeap(1, sFireRedMenuBgMap, 0, 0, 1);
+    ShowBg(1);
+#endif
     CreateTask(Task_MainMenuCheckSaveFile, 0);
 
     return 0;
@@ -791,6 +803,10 @@ static void Task_DisplayMainMenu(u8 taskId)
 
         // Note: If there is no save file, the save block is zeroed out,
         // so the default gender is MALE.
+#ifdef FIRERED
+        palette = RGB(4, 4, 5);
+        LoadPalette(&palette, BG_PLTT_ID(15) + 1, PLTT_SIZEOF(1));
+#else
         if (gSaveBlock2Ptr->playerGender == MALE)
         {
             palette = RGB(4, 16, 31);
@@ -801,6 +817,7 @@ static void Task_DisplayMainMenu(u8 taskId)
             palette = RGB(31, 3, 21);
             LoadPalette(&palette, BG_PLTT_ID(15) + 1, PLTT_SIZEOF(1));
         }
+#endif
 
         switch (gTasks[taskId].tMenuType)
         {
