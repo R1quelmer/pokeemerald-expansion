@@ -16,6 +16,7 @@
 #include "string_util.h"
 #include "event_data.h"
 #include "battle.h"
+#include "save.h"
 #include "constants/items.h"
 #include "constants/flags.h"
 #include "constants/pokedex.h"
@@ -41,6 +42,9 @@ bool8 TryInitFireRedVisualQA(void)
     SetHBlankCallback(NULL);
     Sav2_ClearSetDefault();
     gVisualQaProgress = 11;
+    // These fixtures exercise menus, not RTC provisioning. An isolated
+    // headless cartridge has no user's persisted RTC/save handshake.
+    gSaveFileStatus = SAVE_STATUS_OK;
     NewGameInitData();
     gVisualQaProgress = 12;
     StringCopy(gSaveBlock2Ptr->playerName, COMPOUND_STRING("RED"));
