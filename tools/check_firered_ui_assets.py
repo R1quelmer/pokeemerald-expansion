@@ -60,6 +60,9 @@ def main():
         with Image.open(folder / 'summary_tiles.png') as atlas:
             count = atlas.width * atlas.height // 64
         assert all((tile & 1023) < count for tile in struct.unpack('<1024H', data)), page
+        if page in ('info', 'info_egg'):
+            tilemap = struct.unpack('<1024H', data)
+            assert all(tilemap[y * 32 + x] >> 12 == 4 for y in range(2) for x in range(11, 19)), 'Pagination palette lost'
     print('FireRed UI pixels, palettes, tilemaps and runtime tile reservations verified')
 
 

@@ -93,7 +93,7 @@ def summary_panels():
         cols[1:7]=[INK,PAPER,MUTED,PAPER,PAPER,MUTED]
         cols[7:16]=[accent,accent,accent,accent,accent,PAPER,MUTED,MUTED,INK]
         if bank==4: # Pagination symbols retain their contrast roles.
-            cols[2:10]=[RED,MUTED,PAPER,PAPER,MUTED,INK,PAPER,MUTED]
+            cols[2:10]=[PAPER,PAPER,RED,RED,PAPER,PAPER,PAPER,PAPER]
         colors.extend(cols)
     colors.extend([PAPER,INK,PAPER,INK,PAPER,RED,PAPER,BLUE,PAPER,RED,PAPER,
                    BLUE,PAPER,RED,PAPER,INK])
@@ -129,6 +129,11 @@ def summary_panels():
         rows=[3,8,13] if name.startswith('info') else ([3,6,13] if name=='skills' else [3,14])
         for y in rows:
             tm[y*32+10:y*32+30]=old[y*32+10:y*32+30]
+        if name.startswith('info'):
+            # DrawPagination updates tile numbers while retaining the map's
+            # palette bits. Its four 16x16 widgets must stay in bank 4.
+            for y in range(2):
+                for x in range(11,19):tm[y*32+x]=(tm[y*32+x]&0x0fff)|0x4000
         (OUT/f'summary_{name}.bin').write_bytes(struct.pack('<1024H',*tm))
     count=240+len(extra)
     assert ((count+15)//16)*16 < 576, 'Summary atlas would overlap BG screenblocks'
