@@ -33,6 +33,7 @@ EWRAM_DATA volatile u32 gVisualQaProgress = 0;
 static bool8 sPrepared;
 void FireRedVisualQA_OpenStorage(void);
 void FireRedVisualQA_OpenPartyLayout(u8 layout, MainCallback callback);
+void CB2_ReinitMainMenu(void);
 
 static void FieldCB_VisualQaRival(void)
 {
@@ -102,6 +103,19 @@ bool8 TryInitFireRedVisualQA(void)
         SetMonData(&gParties[B_TRAINER_PLAYER][1], MON_DATA_STATUS, &status);
         SetMonData(&gParties[B_TRAINER_PLAYER][2], MON_DATA_HELD_ITEM, &item);
     }
+    if (scene == 28)
+    {
+        bool8 isEgg = TRUE;
+        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_IS_EGG, &isEgg);
+        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_NICKNAME, COMPOUND_STRING("EGG"));
+    }
+    if (scene == 29)
+    {
+        u16 item = ITEM_CHARIZARDITE_X;
+        u32 status = STATUS1_POISON;
+        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_STATUS, &status);
+        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_HELD_ITEM, &item);
+    }
     gVisualQaProgress = 14;
     gMain.savedCallback = ReturnFromVisualQA;
     // The title screen's tasks must not run inside a directly opened menu.
@@ -121,8 +135,9 @@ bool8 TryInitFireRedVisualQA(void)
     case 4: GoToBagMenu(ITEMMENULOCATION_FIELD, POCKET_ITEMS, ReturnFromVisualQA); break;
     case 18: case 19: case 20: case 21:
         GoToBagMenu(ITEMMENULOCATION_FIELD, scene - 17, ReturnFromVisualQA); break;
-    case 22: case 23:
+    case 22: case 23: case 28: case 29:
         ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
+    case 27: SetMainCallback2(CB2_ReinitMainMenu); break;
     case 5: SetMainCallback2(CB2_OpenPokedex); break;
     case 6: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
     case 7: DoNamingScreen(NAMING_SCREEN_PLAYER, gSaveBlock2Ptr->playerName, 0, 0, 0, ReturnFromVisualQA); break;

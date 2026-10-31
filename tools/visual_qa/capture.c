@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 26; ++scene)
+    for (unsigned scene = 0; scene <= 29; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -59,10 +59,12 @@ int main(int argc, char **argv)
                     if (age == 780 || age == 781) keys = 64;
                     if (age == 960 || age == 961) keys = 2; /* cancel to fixture return */
                 }
-                if (scene == 22 || scene == 23)
+                if (scene == 22 || scene == 23 || scene == 29)
                 {
                     if (age == 600 || age == 601) keys = 16;
                     if (scene == 23 && (age == 780 || age == 781)) keys = 16;
+                    if (scene == 23 && (age == 1000 || age == 1001)) keys = 1;
+                    if (scene == 23 && (age == 1180 || age == 1181)) keys = 128;
                 }
                 if (scene == 4)
                 {
@@ -85,6 +87,13 @@ int main(int argc, char **argv)
                     if (age == 900 || age == 901 || age == 1100 || age == 1101) keys = 16;
                     if (age == 1500 || age == 1501 || age == 1700 || age == 1701) keys = 2;
                 }
+                if (scene == 27)
+                {
+                    if (age == 600 || age == 601 || age == 720 || age == 721) keys = 128;
+                    if (age == 840 || age == 841) keys = 1;
+                    if (age == 1100 || age == 1101) keys = 16;
+                    if (age == 1400 || age == 1401) keys = 2;
+                }
                 core->setKeys(core, keys);
             }
             core->runFrame(core);
@@ -98,6 +107,8 @@ int main(int argc, char **argv)
                 || (scene == 8 && readyFrame && frame - readyFrame >= 360
                     && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30)
                 || (scene == 26 && readyFrame && frame - readyFrame >= 360
+                    && frame - readyFrame <= 1800 && (frame - readyFrame) % 60 == 30)
+                || ((scene == 23 || scene == 27) && readyFrame && frame - readyFrame >= 360
                     && frame - readyFrame <= 1800 && (frame - readyFrame) % 60 == 30))
             {
                 char path[512];
