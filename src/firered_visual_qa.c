@@ -32,6 +32,7 @@ EWRAM_DATA u8 gVisualQaScene = 0;
 EWRAM_DATA volatile u32 gVisualQaProgress = 0;
 static bool8 sPrepared;
 void FireRedVisualQA_OpenStorage(void);
+void FireRedVisualQA_OpenPartyLayout(u8 layout, MainCallback callback);
 
 static void FieldCB_VisualQaRival(void)
 {
@@ -74,6 +75,7 @@ bool8 TryInitFireRedVisualQA(void)
     for (u32 i = 0; i < PARTY_SIZE; i++)
     {
         CreateMonWithIVs(&gParties[B_TRAINER_PLAYER][i], species[i], 25 + i * 5, 0, OTID_STRUCT_PLAYER_ID, 31);
+        GiveMonInitialMoveset(&gParties[B_TRAINER_PLAYER][i]);
         GetSetPokedexFlag(SpeciesToNationalPokedexNum(species[i]), FLAG_SET_SEEN);
         GetSetPokedexFlag(SpeciesToNationalPokedexNum(species[i]), FLAG_SET_CAUGHT);
     }
@@ -83,6 +85,8 @@ bool8 TryInitFireRedVisualQA(void)
     AddBagItem(ITEM_POKE_BALL, 20);
     AddBagItem(ITEM_RARE_CANDY, 3);
     AddBagItem(ITEM_MEGA_RING, 1);
+    AddBagItem(ITEM_ORAN_BERRY, 15);
+    AddBagItem(ITEM_TM01, 2);
     FlagSet(FLAG_SYS_POKEDEX_GET);
     if (scene >= 11 && scene <= 16)
     {
@@ -108,14 +112,14 @@ bool8 TryInitFireRedVisualQA(void)
     switch (scene)
     {
     case 1: SetMainCallback2(CB2_InitOptionMenu); break;
-    case 2: SetMainCallback2(CB2_PartyMenuFromStartMenu); break;
+    case 2: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_SINGLE, ReturnFromVisualQA); break;
     case 11: case 12: case 13: case 14: case 15: case 16: case 17:
-        SetMainCallback2(CB2_PartyMenuFromStartMenu); break;
+        FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_SINGLE, ReturnFromVisualQA); break;
+    case 24: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_DOUBLE, ReturnFromVisualQA); break;
+    case 25: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_MULTI_FULL, ReturnFromVisualQA); break;
     case 3: ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
     case 4: GoToBagMenu(ITEMMENULOCATION_FIELD, POCKET_ITEMS, ReturnFromVisualQA); break;
     case 18: case 19: case 20: case 21:
-        AddBagItem(ITEM_ORAN_BERRY, 15);
-        AddBagItem(ITEM_TM01, 2);
         GoToBagMenu(ITEMMENULOCATION_FIELD, scene - 17, ReturnFromVisualQA); break;
     case 22: case 23:
         ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
@@ -126,12 +130,14 @@ bool8 TryInitFireRedVisualQA(void)
     case 9:
         ZeroEnemyPartyMons();
         CreateMonWithIVs(&gParties[B_TRAINER_OPPONENT_A][0], SPECIES_FENNEKIN, 5, 0, OTID_STRUCT_PLAYER_ID, 31);
+        GiveMonInitialMoveset(&gParties[B_TRAINER_OPPONENT_A][0]);
         gBattleTypeFlags = BATTLE_TYPE_FIRST_BATTLE;
         SetMainCallback2(CB2_InitBattle);
         break;
     case 10:
         ZeroPlayerPartyMons();
         CreateMonWithIVs(&gParties[B_TRAINER_PLAYER][0], SPECIES_TREECKO, 5, 0, OTID_STRUCT_PLAYER_ID, 31);
+        GiveMonInitialMoveset(&gParties[B_TRAINER_PLAYER][0]);
         gPartiesCount[B_TRAINER_PLAYER] = 1;
         VarSet(VAR_STARTER_MON, 0);
         VarSet(VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 3);

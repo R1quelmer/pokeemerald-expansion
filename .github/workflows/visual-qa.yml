@@ -22,6 +22,7 @@ jobs:
       - name: Validate and build isolated QA ROM
         run: |
           python3 tools/check_firered_battle_assets.py
+          python3 tools/check_firered_ui_assets.py
           make clean
           make firered -j$(nproc) VISUAL_QA=1
       - name: Capture actual emulated screens

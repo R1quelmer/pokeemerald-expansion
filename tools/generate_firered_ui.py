@@ -108,7 +108,7 @@ def main():
     text=[PAPER,INK,INK,PAPER,RED,(248,144,160),GREEN,(152,224,184),BLUE,
           (160,208,240),PAPER,INK,PAPER]+[(0,0,0)]*3
     palette(OUT/'main_text.pal',text)
-    option=[(0,0,0),PAPER,BLUE,(24,96,136),(128,208,240),BLUE,INK,MUTED,INK,BLUE]+[(0,0,0)]*6
+    option=[(0,0,0),PAPER,INK,PAPER,BLUE,PAPER,INK,PAPER,INK,BLUE]+[(0,0,0)]*6
     palette(OUT/'options_text.pal',option)
     bag_background()
     party_colors=[(0,0,0),(40,40,48),(32,32,40),PAPER,INK,RED,MUTED,

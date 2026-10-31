@@ -632,6 +632,14 @@ static void RefreshPartyMenu(void) //Refreshes the party menu without restarting
     SetMainCallback2(CB2_ReloadPartyMenu);
 }
 
+#if defined(FIRERED) && defined(VISUAL_QA)
+void FireRedVisualQA_OpenPartyLayout(u8 layout, MainCallback callback)
+{
+    InitPartyMenu(PARTY_MENU_TYPE_FIELD, layout, PARTY_ACTION_CHOOSE_MON, FALSE,
+        PARTY_MSG_CHOOSE_MON, Task_HandleChooseMonInput, callback);
+}
+#endif
+
 static void CB2_UpdatePartyMenu(void)
 {
     RunTasks();
@@ -2940,6 +2948,10 @@ void DisplayPartyMenuStdMessage(u32 stringId)
         }
         DrawStdFrameWithCustomTileAndPalette(*windowPtr, FALSE, 0x4F, 13);
         StringExpandPlaceholders(gStringVar4, sActionStringTable[stringId]);
+#ifdef FIRERED
+        if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE && stringId == PARTY_MSG_DO_WHAT_WITH_MON)
+            StringCopy(gStringVar4, COMPOUND_STRING("Choose an action."));
+#endif
         AddTextPrinterParameterized(*windowPtr, FONT_NORMAL, gStringVar4, 0, 1, 0, 0);
         ScheduleBgCopyTilemapToVram(2);
     }

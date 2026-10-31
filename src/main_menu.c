@@ -679,7 +679,11 @@ static void Task_MainMenuCheckSaveFile(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR | MAIN_MENU_BG1_WIN_OUT);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_EFFECT_DARKEN | BLDCNT_TGT1_BG0);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+#ifdef FIRERED
+        SetGpuReg(REG_OFFSET_BLDY, 2);
+#else
         SetGpuReg(REG_OFFSET_BLDY, 7);
+#endif
 
         if (IsWirelessAdapterConnected())
             tWirelessAdapterConnected = TRUE;
@@ -757,7 +761,11 @@ static void Task_MainMenuCheckBattery(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR | MAIN_MENU_BG1_WIN_OUT);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_EFFECT_DARKEN | BLDCNT_TGT1_BG0);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+#ifdef FIRERED
+        SetGpuReg(REG_OFFSET_BLDY, 2);
+#else
         SetGpuReg(REG_OFFSET_BLDY, 7);
+#endif
 
         if (!(RtcGetErrorStatus() & RTC_ERR_FLAG_MASK))
         {
@@ -795,7 +803,11 @@ static void Task_DisplayMainMenu(u8 taskId)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_OBJ | WINOUT_WIN01_CLR | MAIN_MENU_BG1_WIN_OUT);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_EFFECT_DARKEN | BLDCNT_TGT1_BG0);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+#ifdef FIRERED
+        SetGpuReg(REG_OFFSET_BLDY, 2);
+#else
         SetGpuReg(REG_OFFSET_BLDY, 7);
+#endif
 
         palette = RGB_BLACK;
         LoadPalette(&palette, BG_PLTT_ID(15) + 14, PLTT_SIZEOF(1));
