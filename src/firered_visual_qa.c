@@ -17,13 +17,30 @@
 #include "event_data.h"
 #include "battle.h"
 #include "save.h"
+#include "task.h"
+#include "overworld.h"
+#include "field_screen_effect.h"
+#include "event_object_movement.h"
+#include "constants/map_groups.h"
+#include "constants/vars.h"
 #include "constants/items.h"
 #include "constants/flags.h"
 #include "constants/pokedex.h"
+#include "constants/pokemon.h"
 
 EWRAM_DATA u8 gVisualQaScene = 0;
 EWRAM_DATA volatile u32 gVisualQaProgress = 0;
 static bool8 sPrepared;
+void FireRedVisualQA_OpenStorage(void);
+
+static void FieldCB_VisualQaRival(void)
+{
+    // Resume immediately before the real coordinate trigger at (6,8).
+    // Local ID 8 is Blue in PalletTown_ProfessorOaksLab_Frlg/map.json.
+    TryMoveObjectEventToMapCoords(8, MAP_NUM(MAP_PALLET_TOWN_PROFESSOR_OAKS_LAB),
+        MAP_GROUP(MAP_PALLET_TOWN_PROFESSOR_OAKS_LAB), 10, 5);
+    FieldCB_WarpExitFadeFromBlack();
+}
 
 static void ReturnFromVisualQA(void)
 {
@@ -67,25 +84,64 @@ bool8 TryInitFireRedVisualQA(void)
     AddBagItem(ITEM_RARE_CANDY, 3);
     AddBagItem(ITEM_MEGA_RING, 1);
     FlagSet(FLAG_SYS_POKEDEX_GET);
+    if (scene >= 11 && scene <= 16)
+    {
+        gPartiesCount[B_TRAINER_PLAYER] = scene - 10;
+        for (u32 i = scene - 10; i < PARTY_SIZE; i++)
+            ZeroMonData(&gParties[B_TRAINER_PLAYER][i]);
+    }
+    if (scene == 17)
+    {
+        u16 hp = 0, item = ITEM_ORAN_BERRY;
+        u32 status = STATUS1_POISON;
+        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_HP, &hp);
+        SetMonData(&gParties[B_TRAINER_PLAYER][1], MON_DATA_STATUS, &status);
+        SetMonData(&gParties[B_TRAINER_PLAYER][2], MON_DATA_HELD_ITEM, &item);
+    }
     gVisualQaProgress = 14;
     gMain.savedCallback = ReturnFromVisualQA;
+    // The title screen's tasks must not run inside a directly opened menu.
+    ResetTasks();
+    EnableNationalPokedex();
     gVisualQaScene = scene | 0x80;
     gVisualQaProgress = 20 + scene;
     switch (scene)
     {
     case 1: SetMainCallback2(CB2_InitOptionMenu); break;
     case 2: SetMainCallback2(CB2_PartyMenuFromStartMenu); break;
+    case 11: case 12: case 13: case 14: case 15: case 16: case 17:
+        SetMainCallback2(CB2_PartyMenuFromStartMenu); break;
     case 3: ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
     case 4: GoToBagMenu(ITEMMENULOCATION_FIELD, POCKET_ITEMS, ReturnFromVisualQA); break;
+    case 18: case 19: case 20: case 21:
+        AddBagItem(ITEM_ORAN_BERRY, 15);
+        AddBagItem(ITEM_TM01, 2);
+        GoToBagMenu(ITEMMENULOCATION_FIELD, scene - 17, ReturnFromVisualQA); break;
+    case 22: case 23:
+        ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
     case 5: SetMainCallback2(CB2_OpenPokedex); break;
     case 6: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
     case 7: DoNamingScreen(NAMING_SCREEN_PLAYER, gSaveBlock2Ptr->playerName, 0, 0, 0, ReturnFromVisualQA); break;
-    case 8: ShowPokemonStorageSystemPC(); break;
+    case 8: FireRedVisualQA_OpenStorage(); break;
     case 9:
         ZeroEnemyPartyMons();
         CreateMonWithIVs(&gParties[B_TRAINER_OPPONENT_A][0], SPECIES_FENNEKIN, 5, 0, OTID_STRUCT_PLAYER_ID, 31);
         gBattleTypeFlags = BATTLE_TYPE_FIRST_BATTLE;
         SetMainCallback2(CB2_InitBattle);
+        break;
+    case 10:
+        ZeroPlayerPartyMons();
+        CreateMonWithIVs(&gParties[B_TRAINER_PLAYER][0], SPECIES_TREECKO, 5, 0, OTID_STRUCT_PLAYER_ID, 31);
+        gPartiesCount[B_TRAINER_PLAYER] = 1;
+        VarSet(VAR_STARTER_MON, 0);
+        VarSet(VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 3);
+        FlagClear(FLAG_HIDE_OAK_IN_HIS_LAB);
+        FlagClear(FLAG_HIDE_RIVAL_IN_LAB);
+        SetWarpDestination(MAP_GROUP(MAP_PALLET_TOWN_PROFESSOR_OAKS_LAB),
+            MAP_NUM(MAP_PALLET_TOWN_PROFESSOR_OAKS_LAB), WARP_ID_NONE, 6, 7);
+        WarpIntoMap();
+        gFieldCallback = FieldCB_VisualQaRival;
+        SetMainCallback2(CB2_LoadMap);
         break;
     }
     return TRUE;

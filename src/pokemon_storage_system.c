@@ -1993,6 +1993,13 @@ static void EnterPokeStorage(u8 boxOption)
     }
 }
 
+#if defined(FIRERED) && defined(VISUAL_QA)
+void FireRedVisualQA_OpenStorage(void)
+{
+    EnterPokeStorage(OPTION_MOVE_MONS);
+}
+#endif
+
 static void CB2_ReturnToPokeStorage(void)
 {
     ResetTasks();

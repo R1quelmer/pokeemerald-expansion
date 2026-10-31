@@ -31,11 +31,13 @@ jobs:
           address=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gVisualQaScene" {print $1}')
           progress=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gVisualQaProgress" {print $1}')
           main=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gMain" {print $1}')
+          flags=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gBattleTypeFlags" {print $1}')
+          outcome=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gBattleOutcome" {print $1}')
           test -n "$address"
           test -n "$progress"
           test -n "$main"
           arm-none-eabi-nm -n pokefirered.elf > visual-qa/symbols.txt
-          /tmp/firered-capture pokefirered.gba visual-qa "$address" "$progress" "$main" | awk '/^scene=/' | tee visual-qa/capture.log
+          /tmp/firered-capture pokefirered.gba visual-qa "$address" "$progress" "$main" "$flags" "$outcome" | awk '/^scene=/' | tee visual-qa/capture.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

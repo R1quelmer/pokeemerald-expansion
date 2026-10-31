@@ -1,5 +1,5 @@
 /* Headless mGBA runner. The ROM stays on the runner; only PNGs are exported.
- * Usage: capture ROM output-dir scenario-byte-address progress-address main-address
+ * Usage: capture ROM output-dir scene-address progress-address main-address flags-address outcome-address
  * Build: cc capture.c -o capture -lmgba
  */
 #include <mgba/core/core.h>
@@ -10,11 +10,13 @@
 
 int main(int argc, char **argv)
 {
-    if (argc != 6) return 2;
+    if (argc != 8) return 2;
     unsigned address = strtoul(argv[3], NULL, 16);
     unsigned progressAddress = strtoul(argv[4], NULL, 16);
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
-    for (unsigned scene = 0; scene <= 9; ++scene)
+    unsigned flagsAddress = strtoul(argv[6], NULL, 16);
+    unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
+    for (unsigned scene = 0; scene <= 23; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -25,7 +27,9 @@ int main(int argc, char **argv)
         if (!pixels || !mCoreLoadFile(core, argv[1])) return 4;
         core->setVideoBuffer(core, pixels, 256);
         core->reset(core);
-        for (unsigned frame = 0; frame < 2800; ++frame)
+        unsigned readyFrame = 0;
+        unsigned frameCount = scene == 10 ? 12000 : 2800;
+        for (unsigned frame = 0; frame < frameCount; ++frame)
         {
             /* Copyright/intro/title advance with START, then fixture launch.
              * Keep the scenario byte fresh across startup RAM initialization. */
@@ -35,9 +39,37 @@ int main(int argc, char **argv)
                 core->setKeys(core, frame < 1400 && frame % 90 < 2 ? 8 : 0);
             }
             else
-                core->setKeys(core, 0);
+            {
+                if (!readyFrame) readyFrame = frame;
+                unsigned age = frame - readyFrame;
+                unsigned keys = 0;
+                if (scene == 10)
+                {
+                    if (age >= 180 && age < 196) keys = 128; /* DOWN onto real map trigger */
+                    if (age >= 240 && age % 45 < 2) keys = 1; /* A through dialogue and battle */
+                }
+                if (scene >= 11 && scene <= 17)
+                {
+                    if (age == 420 || age == 421) keys = 1; /* open actions */
+                    if (age == 480 || age == 481) keys = 2;
+                    if (age == 540 || age == 541) keys = 16;
+                    if (age == 600 || age == 601 || age == 660 || age == 661) keys = 128;
+                    if (age == 720 || age == 721) keys = 32;
+                    if (age == 780 || age == 781) keys = 64;
+                    if (age == 960 || age == 961) keys = 2; /* cancel to fixture return */
+                }
+                if (scene == 22 || scene == 23)
+                {
+                    if (age == 600 || age == 601) keys = 16;
+                    if (scene == 23 && (age == 780 || age == 781)) keys = 16;
+                }
+                core->setKeys(core, keys);
+            }
             core->runFrame(core);
-            if (frame == 1800 || frame == 2300 || frame == 2799)
+            if (frame == 1800 || frame == 2300 || frame == frameCount - 1
+                || (scene == 10 && frame >= 300 && frame % 60 == 0)
+                || (scene >= 11 && scene <= 17 && readyFrame && frame - readyFrame >= 360
+                    && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30))
             {
                 char path[512];
                 snprintf(path, sizeof(path), "%s/scene-%02u-frame-%04u.png", argv[2], scene, frame);
@@ -46,9 +78,10 @@ int main(int argc, char **argv)
                 file->close(file);
                 uint32_t pc = 0;
                 core->readRegister(core, "r15", &pc);
-                printf("scene=%u frame=%u progress=%u callback2=%08x pc=%08x\n",
+                printf("scene=%u frame=%u progress=%u callback2=%08x pc=%08x flags=%08x outcome=%u\n",
                     scene, frame, core->busRead32(core, progressAddress),
-                    core->busRead32(core, mainAddress + 4), pc);
+                    core->busRead32(core, mainAddress + 4), pc,
+                    core->busRead32(core, flagsAddress), core->busRead8(core, outcomeAddress));
             }
         }
         if (scene != 0 && !(core->busRead8(core, address) & 0x80))
