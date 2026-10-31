@@ -14,8 +14,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi libpng-dev libmgba-dev python3-pil
       - name: Validate and build isolated QA ROM
         run: |
-          python3 tools/generate_firered_battle_ui.py
-          git diff --exit-code -- graphics/battle_interface/firered
+          python3 tools/check_firered_battle_assets.py
           make clean
           make firered -j$(nproc) VISUAL_QA=1
       - name: Capture actual emulated screens
