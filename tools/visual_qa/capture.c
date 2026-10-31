@@ -51,6 +51,12 @@ int main(int argc, char **argv)
                     core->busRead32(core, mainAddress + 4), pc);
             }
         }
+        if (scene != 0 && !(core->busRead8(core, address) & 0x80))
+        {
+            fprintf(stderr, "Visual QA scene %u never reached its menu (progress %u)\n",
+                    scene, core->busRead32(core, progressAddress));
+            return 6;
+        }
         core->deinit(core);
         free(pixels);
     }

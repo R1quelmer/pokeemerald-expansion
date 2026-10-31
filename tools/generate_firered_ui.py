@@ -25,6 +25,37 @@ def frame(accent):
     d.line((3,6,3,18),fill=13)
     return im
 
+def bag_background():
+    # Retain the tile IDs used by the pocket-switch wipe and indicators.
+    im=Image.new('P',(256,256),0);d=ImageDraw.Draw(im)
+    d.rectangle((0,0,239,159),fill=3)
+    d.polygon([(0,0),(103,0),(111,8),(111,101),(0,101)],fill=4)
+    d.polygon([(0,0),(111,0),(111,27),(102,31),(0,31)],fill=0)
+    d.polygon([(0,104),(103,104),(111,112),(111,151),(0,151)],fill=1)
+    d.polygon([(112,8),(231,8),(239,16),(239,143),(231,151),(112,151)],fill=0)
+    d.rectangle((112,16,231,143),fill=1)
+    d.line((112,9,230,9),fill=4)
+    d.polygon([(0,88),(16,72),(16,88),(32,72),(32,101),(0,101)],fill=5)
+    d.line((0,155,239,155),fill=4)
+    cols=[INK,PAPER,INK,MUTED,AMBER,(248,200,112),GREEN,(152,224,184),BLUE,
+          (160,208,240),PAPER,INK,MUTED,VIOLET,PAPER,INK]
+    tiles=[Image.new('P',(8,8),0) for _ in range(44)]
+    for i,c in [(11,3),(17,1),(23,3),(43,4)]: tiles[i]=Image.new('P',(8,8),c)
+    ids={tiles[i].tobytes():i for i in [0,11,17,23,43]};tm=[]
+    for y in range(32):
+        for x in range(32):
+            tile=im.crop((8*x,8*y,8*x+8,8*y+8));key=tile.tobytes()
+            if key not in ids: ids[key]=len(tiles);tiles.append(tile)
+            tm.append(ids[key])
+    assert len(tiles)<320, 'Bag graphics would overlap BG2 tilemap'
+    atlas=Image.new('P',(128,((len(tiles)+15)//16)*8),0)
+    for i,tile in enumerate(tiles):atlas.paste(tile,(i%16*8,i//16*8))
+    save(OUT/'bag_background.png',atlas,cols)
+    (OUT/'bag_background.bin').write_bytes(struct.pack('<1024H',*tm))
+    text=[INK,INK,PAPER,(168,168,184),AMBER,RED,(180,180,180),GREEN,
+          BLUE,(248,200,112),PAPER,VIOLET,(192,160,224),BLUE,RED,(248,144,160)]
+    (OUT/'bag.pal').write_text('JASC-PAL\n0100\n32\n'+'\n'.join('%d %d %d'%c for c in cols+text)+'\n',newline='\n')
+
 def main():
     frames=OUT/'frames';frames.mkdir(parents=True,exist_ok=True)
     colors=[(0,0,0),PAPER,INK,MUTED,RED,(248,144,160),GREEN,(152,224,184),
@@ -36,6 +67,7 @@ def main():
     # than the frame's own palette. Its indices must use the shared roles.
     std=frame(RED)
     save(frames/'std.png',std,colors)
+    palette(frames/'std.pal',colors)
     palette(frames/'dexnav_pal.pal',colors)
     for name in ['message_box','signpost']:
         original=Image.open(ROOT/f'graphics/text_window/{name}.png')
@@ -78,6 +110,19 @@ def main():
     palette(OUT/'main_text.pal',text)
     option=[(0,0,0),PAPER,BLUE,(24,96,136),(128,208,240),BLUE,INK,MUTED,INK,BLUE]+[(0,0,0)]*6
     palette(OUT/'options_text.pal',option)
+    bag_background()
+    party_colors=[(0,0,0),(40,40,48),(32,32,40),PAPER,INK,RED,MUTED,
+                  (40,40,48),(40,40,48),GREEN,(112,232,152),BLUE,
+                  (144,208,240),RED,(248,144,160),PAPER]
+    for hide_hp in [False, True]:
+        card=Image.new('P',(112,32),0);cd=ImageDraw.Draw(card)
+        cd.polygon([(4,0),(107,0),(111,4),(111,27),(107,31),(0,31),(0,4)],fill=4)
+        cd.polygon([(4,1),(107,1),(110,4),(110,27),(106,30),(1,30),(1,4)],fill=1)
+        cd.line((5,1,106,1),fill=5)
+        cd.line((1,5,1,29),fill=5)
+        if not hide_hp:
+            cd.rectangle((31,24,80,28),fill=4)
+        save(OUT/('party_card_no_hp.png' if hide_hp else 'party_card.png'),card,party_colors)
     print(f'Generated FireRed shared frames and main-menu background: {len(tiles)} tiles')
 
 if __name__=='__main__':main()

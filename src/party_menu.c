@@ -80,6 +80,9 @@
 #include "constants/party_menu.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
+#ifdef FIRERED
+#include "firered_party_grid.h"
+#endif
 
 enum {
     MENU_SUMMARY,
@@ -454,6 +457,9 @@ static void Task_BattlePyramidChooseMonHeldItems(u8);
 static void ShiftMoveSlot(struct BoxPokemon *, u8, u8);
 static void BlitBitmapToPartyWindow_LeftColumn(u8, u8, u8, u8, u8, bool8);
 static void BlitBitmapToPartyWindow_RightColumn(u8, u8, u8, u8, u8, bool8);
+#ifdef FIRERED
+static void BlitBitmapToFireRedPartyCard(u8, u8, u8, u8, u8, bool8);
+#endif
 static void CursorCb_Summary(u8);
 static void CursorCb_Switch(u8);
 static void CursorCb_Cancel1(u8);
@@ -513,6 +519,36 @@ static const u8 sText_CannotSendMonToBoxPartner[] = _("Cannot send a mon that do
 
 // static const data
 #include "data/party_menu.h"
+
+#ifdef FIRERED
+static const u8 sFireRedPartyCard[] = INCGFX_U8("graphics/ui/firered/party_card.png", ".4bpp");
+static const u8 sFireRedPartyCardNoHP[] = INCGFX_U8("graphics/ui/firered/party_card_no_hp.png", ".4bpp");
+static const struct PartyMenuBoxInfoRects sFireRedPartyCardInfo =
+{
+    BlitBitmapToFireRedPartyCard,
+    {32, 1, 64, 13, 32, 13, 24, 8, 100, 1, 8, 8,
+     56, 13, 24, 8, 80, 13, 24, 8, 32, 25, 48, 3},
+    32, 12, 72, 16
+};
+static const u8 sFireRedPartyGridSpriteCoords[PARTY_SIZE][8] =
+{
+    {16,24,28,20,16,35,16,24}, {136,24,148,20,136,35,136,24},
+    {16,64,28,60,16,75,16,64}, {136,64,148,60,136,75,136,64},
+    {16,104,28,100,16,115,16,104}, {136,104,148,100,136,115,136,104}
+};
+// 6 * 56 tiles from 0x63 through 0x1b2: before the existing message at 0x1df.
+static const struct WindowTemplate sFireRedPartyGridWindows[] =
+{
+    {.bg=0, .tilemapLeft=0, .tilemapTop=1, .width=14, .height=4, .paletteNum=3, .baseBlock=0x63},
+    {.bg=0, .tilemapLeft=15,.tilemapTop=1, .width=14, .height=4, .paletteNum=4, .baseBlock=0x9b},
+    {.bg=0, .tilemapLeft=0, .tilemapTop=6, .width=14, .height=4, .paletteNum=5, .baseBlock=0xd3},
+    {.bg=0, .tilemapLeft=15,.tilemapTop=6, .width=14, .height=4, .paletteNum=6, .baseBlock=0x10b},
+    {.bg=0, .tilemapLeft=0, .tilemapTop=11,.width=14, .height=4, .paletteNum=7, .baseBlock=0x143},
+    {.bg=0, .tilemapLeft=15,.tilemapTop=11,.width=14, .height=4, .paletteNum=8, .baseBlock=0x17b},
+    [WIN_MSG] = {.bg=2, .tilemapLeft=1, .tilemapTop=15, .width=28, .height=4, .paletteNum=14, .baseBlock=0x1df},
+    DUMMY_WIN_TEMPLATE
+};
+#endif
 
 // code
 static void InitPartyMenu(enum PartyMenuType menuType, enum PartyMenuLayout layout, u8 partyAction, bool8 keepCursorPos, u8 messageId, TaskFunc task, MainCallback callback)
@@ -913,12 +949,27 @@ static bool8 AllocPartyMenuBgGfx(void)
         if (!IsDma3ManagerBusyWithBgCopy())
         {
             DecompressDataWithHeaderWram(gPartyMenuBg_Tilemap, sPartyBgTilemapBuffer);
+#ifdef FIRERED
+            if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
+            {
+                static const u8 blankTile[32] = {0};
+                CpuFill16(0, sPartyBgTilemapBuffer, 0x800);
+                LoadBgTiles(1, blankTile, sizeof(blankTile), 0);
+            }
+#endif
             sPartyMenuInternal->data[0]++;
         }
         break;
     case 2:
         LoadPalette(gPartyMenuBg_Pal, BG_PLTT_ID(0), 11 * PLTT_SIZE_4BPP);
         CpuCopy16(gPlttBufferUnfaded, sPartyMenuInternal->palBuffer, 11 * PLTT_SIZE_4BPP);
+#ifdef FIRERED
+        if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
+        {
+            const u16 backdrop = RGB(4, 4, 5);
+            LoadPalette(&backdrop, 0, PLTT_SIZEOF(1));
+        }
+#endif
         sPartyMenuInternal->data[0]++;
         break;
     case 3:
@@ -995,6 +1046,16 @@ static void LoadPartyMenuBoxes(enum PartyMenuLayout layout)
         sPartyMenuBoxes[3].infoRects = &sPartyBoxInfoRects[PARTY_BOX_LEFT_COLUMN];
     else if (layout == PARTY_LAYOUT_DOUBLE || layout == PARTY_LAYOUT_MULTI)
         sPartyMenuBoxes[1].infoRects = &sPartyBoxInfoRects[PARTY_BOX_LEFT_COLUMN];
+#ifdef FIRERED
+    if (layout == PARTY_LAYOUT_SINGLE)
+    {
+        for (i = 0; i < PARTY_SIZE; i++)
+        {
+            sPartyMenuBoxes[i].infoRects = &sFireRedPartyCardInfo;
+            sPartyMenuBoxes[i].spriteCoords = sFireRedPartyGridSpriteCoords[i];
+        }
+    }
+#endif
 }
 
 static void RenderPartyMenuBox(u8 slot)
@@ -1833,6 +1894,13 @@ static void UpdateCurrentPartySelection(s8 *slotPtr, s8 movementDir)
 static void UpdatePartySelectionSingleLayout(s8 *slotPtr, s8 movementDir)
 {
     enum BattleTrainer partyTrainer = (gPartyMenu.layout == PARTY_LAYOUT_MULTI_FULL_PARTNER) ? B_TRAINER_PARTNER : B_TRAINER_PLAYER;
+#ifdef FIRERED
+    if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
+    {
+        *slotPtr = FireRedPartyGridNext(*slotPtr, movementDir, gPartiesCount[partyTrainer], sPartyMenuInternal->chooseHalf);
+        return;
+    }
+#endif
     // PARTY_SIZE + 1 is Cancel, PARTY_SIZE is Confirm
     switch (movementDir)
     {
@@ -2365,6 +2433,14 @@ static enum CanMoveBeLearned CanTeachMove(struct Pokemon *mon, enum Move move)
 
 static void InitPartyMenuWindows(enum PartyMenuLayout layout)
 {
+#ifdef FIRERED
+    if (layout == PARTY_LAYOUT_SINGLE)
+    {
+        InitWindows(sFireRedPartyGridWindows);
+        LoadPartyMenuWindows();
+        return;
+    }
+#endif
     switch (layout)
     {
     case PARTY_LAYOUT_MULTI_SHOWCASE:
@@ -2489,8 +2565,32 @@ static void BlitBitmapToPartyWindow_RightColumn(u8 windowId, u8 x, u8 y, u8 widt
 
 static void DrawEmptySlot(u8 windowId)
 {
+#ifdef FIRERED
+    if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
+    {
+        BlitBitmapToFireRedPartyCard(windowId, 0, 0, 0, 0, TRUE);
+        return;
+    }
+#endif
     BlitBitmapToPartyWindow(windowId, sSlotTilemap_WideEmpty, 18, 0, 0, 18, 3);
 }
+
+#ifdef FIRERED
+static void BlitBitmapToFireRedPartyCard(u8 windowId, u8 x, u8 y, u8 width, u8 height, bool8 hideHP)
+{
+    if (width == 0 && height == 0)
+    {
+        width = 14;
+        height = 4;
+    }
+    if (x >= 14 || y >= 4)
+        return;
+    width = min(width, 14 - x);
+    height = min(height, 4 - y);
+    BlitBitmapRectToWindow(windowId, hideHP ? sFireRedPartyCardNoHP : sFireRedPartyCard,
+                          x * 8, y * 8, 112, 32, x * 8, y * 8, width * 8, height * 8);
+}
+#endif
 
 #define LOAD_PARTY_BOX_PAL(paletteIds, paletteOffsets)                                                    \
 {                                                                                                         \
@@ -2574,6 +2674,22 @@ static void LoadPartyBoxPalette(struct PartyMenuBox *menuBox, u8 palFlags)
         LOAD_PARTY_BOX_PAL(sPartyBoxEmptySlotPalIds1, sPartyBoxPalOffsets1);
         LOAD_PARTY_BOX_PAL(sPartyBoxEmptySlotPalIds2, sPartyBoxPalOffsets2);
     }
+#ifdef FIRERED
+    if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
+    {
+        const u16 textColors[] = {RGB(4, 4, 5), RGB(31, 31, 31)};
+        u16 face = (palFlags & PARTY_PAL_FAINTED) ? RGB(8, 4, 6) : RGB(5, 5, 6);
+        u16 accent = (palFlags & PARTY_PAL_SELECTED) ? RGB(24, 5, 8) : RGB(12, 12, 14);
+        if (palFlags & (PARTY_PAL_SWITCHING | PARTY_PAL_TO_SWITCH | PARTY_PAL_TO_SOFTBOIL))
+            accent = RGB(29, 20, 5);
+        const u16 borderColors[] = {RGB(4, 4, 5), accent, RGB(28, 28, 29)};
+        const u16 faceColors[] = {face, face};
+        LoadPalette(&face, palOffset + 1, PLTT_SIZEOF(1));
+        LoadPalette(textColors, palOffset + 2, sizeof(textColors));
+        LoadPalette(borderColors, palOffset + 4, sizeof(borderColors));
+        LoadPalette(faceColors, palOffset + 7, sizeof(faceColors));
+    }
+#endif
 }
 
 static void DisplayPartyPokemonBarDetail(u8 windowId, const u8 *str, u8 color, const u8 *align)

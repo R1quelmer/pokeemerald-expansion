@@ -15,6 +15,10 @@ jobs:
       - name: Compile emulator capture tool before building the ROM
         run: |
           cc -Wall -Wextra -Werror tools/visual_qa/capture.c -o /tmp/firered-capture -lmgba
+      - name: Check navigation for full and partial FireRed parties
+        run: |
+          cc -std=c99 -Wall -Wextra -Werror tools/visual_qa/test_grid.c -o /tmp/firered-grid-test
+          /tmp/firered-grid-test
       - name: Validate and build isolated QA ROM
         run: |
           python3 tools/check_firered_battle_assets.py
@@ -22,6 +26,7 @@ jobs:
           make firered -j$(nproc) VISUAL_QA=1
       - name: Capture actual emulated screens
         run: |
+          set -o pipefail
           mkdir -p visual-qa
           address=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gVisualQaScene" {print $1}')
           progress=$(arm-none-eabi-nm pokefirered.elf | awk '$3 == "gVisualQaProgress" {print $1}')

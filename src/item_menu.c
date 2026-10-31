@@ -417,7 +417,11 @@ enum {
 static const u8 sFontColorTable[][3] = {
                             // bgColor, textColor, shadowColor
     [COLORID_NORMAL]      = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE,      TEXT_COLOR_LIGHT_GRAY},
+#ifdef FIRERED
+    [COLORID_POCKET_NAME] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_DARK_GRAY},
+#else
     [COLORID_POCKET_NAME] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE,      TEXT_COLOR_RED},
+#endif
     [COLORID_GRAY_CURSOR] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_GRAY, TEXT_COLOR_GREEN},
     [COLORID_UNUSED]      = {TEXT_COLOR_DARK_GRAY,   TEXT_COLOR_WHITE,      TEXT_COLOR_LIGHT_GRAY},
     [COLORID_TMHM_INFO]   = {TEXT_COLOR_TRANSPARENT, TEXT_DYNAMIC_COLOR_5,  TEXT_DYNAMIC_COLOR_1}
@@ -845,6 +849,22 @@ static void BagMenu_InitBGs(void)
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
 }
 
+#ifdef FIRERED
+static void UpdateFireRedBagAccent(void)
+{
+    static const u16 accents[POCKETS_COUNT] = {
+        [POCKET_ITEMS] = RGB(29,20,5),
+        [POCKET_POKE_BALLS] = RGB(6,21,28),
+        [POCKET_TM_HM] = RGB(14,10,23),
+        [POCKET_BERRIES] = RGB(6,24,14),
+        [POCKET_KEY_ITEMS] = RGB(24,5,8),
+    };
+    u16 accent = accents[gBagPosition.pocket];
+    LoadPalette(&accent, BG_PLTT_ID(0) + 4, PLTT_SIZEOF(1));
+    LoadPalette(&accent, BG_PLTT_ID(1) + 4, PLTT_SIZEOF(1));
+}
+#endif
+
 static bool8 LoadBagMenu_Graphics(void)
 {
     switch (gBagMenu->graphicsLoadState)
@@ -866,6 +886,9 @@ static bool8 LoadBagMenu_Graphics(void)
             LoadPalette(gBagScreenFemale_Pal, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
         else
             LoadPalette(gBagScreenMale_Pal, BG_PLTT_ID(0), 2 * PLTT_SIZE_4BPP);
+#ifdef FIRERED
+        UpdateFireRedBagAccent();
+#endif
         gBagMenu->graphicsLoadState++;
         break;
     case 3:
@@ -1496,6 +1519,9 @@ static void DrawItemListBgRow(u8 y)
 
 static void DrawPocketIndicatorSquare(u8 x, bool8 isCurrentPocket)
 {
+#ifdef FIRERED
+    UpdateFireRedBagAccent();
+#endif
     if (!isCurrentPocket)
         FillBgTilemapBufferRect_Palette0(2, 0x1017, x + 5, 3, 1, 1);
     else
