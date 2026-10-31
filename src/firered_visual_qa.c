@@ -45,6 +45,9 @@ bool8 TryInitFireRedVisualQA(void)
     // These fixtures exercise menus, not RTC provisioning. An isolated
     // headless cartridge has no user's persisted RTC/save handshake.
     gSaveFileStatus = SAVE_STATUS_OK;
+    // NewGameInitData preserves the rival name on the stack. A zeroed save
+    // is not an EOS-terminated game string; seed it before that copy.
+    StringCopy(gSaveBlock1Ptr->rivalName, COMPOUND_STRING("BLUE"));
     NewGameInitData();
     gVisualQaProgress = 12;
     StringCopy(gSaveBlock2Ptr->playerName, COMPOUND_STRING("RED"));
