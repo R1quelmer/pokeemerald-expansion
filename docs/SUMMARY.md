@@ -2,6 +2,7 @@
 
 - [README](./README.md)
 - [FEATURES](./FEATURES.md)
+- [FireRed battle UI](./firered-battle-ui.md)
 - [Installation](./INSTALL.md)
     - [Setting up WSL1 (Legacy Portion)](./legacy_WSL1_INSTALL.md)
     - [ChromeOS](./install/chromeos/CHROME_OS.md)
