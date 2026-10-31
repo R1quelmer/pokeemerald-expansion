@@ -191,7 +191,17 @@ def validate():
         assert im.mode == "P" and im.size == original.size, path.name
         assert max(im.tobytes()) < 16, path.name
     assert (DEST / "textbox_map.bin").stat().st_size == 4096
+    atlas = Image.open(DEST / "textbox.png")
+    original = Image.open(SOURCE / "textbox.png")
+    for i in [0, 1, 2, 0x16, 28, 29, 30, 31, *range(0x22, 0x2b)]:
+        rect = ((i % 16) * 8, (i // 16) * 8,
+                (i % 16) * 8 + 8, (i // 16) * 8 + 8)
+        assert atlas.crop(rect).tobytes() == original.crop(rect).tobytes(), i
+    tilemap = struct.unpack("<2048H", (DEST / "textbox_map.bin").read_bytes())
+    assert max(tile & 0x3ff for tile in tilemap) < 0x90
+    assert {tile >> 12 for tile in tilemap} == {0, 1}
     print("Validated: original dimensions, 4bpp indices, no extra OBJ tiles/palettes")
+    print("Validated: fixed cursor/confirmation indices and BG window boundary")
 
 
 if __name__ == "__main__":
