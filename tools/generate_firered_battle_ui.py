@@ -155,11 +155,14 @@ def textbox():
     # Controllers address cursor tiles 1/2, 28/29, 30/31 and erase tile 0x16
     # directly; HandleBattleWindow uses the 0x22..0x2a nine-slice. Retain all
     # of these indices instead of allowing deduplication to renumber them.
+    # The Oak/Old Man tutorial also loads 14 message-frame tiles at 0x30.
+    # Keep the entire first 64 slots out of the skin allocator: otherwise
+    # LoadBattleMenuWindowGfx overwrites our border during the first battle.
     original = Image.open(SOURCE / "textbox.png")
     tiles = [original.crop(((i % 16) * 8, (i // 16) * 8,
                             (i % 16) * 8 + 8, (i // 16) * 8 + 8))
-             for i in range(48)]
-    ids = {tile.tobytes(): i for i, tile in enumerate(tiles)}
+             for i in range(64)]
+    ids = {tile.tobytes(): i for i, tile in enumerate(tiles) if i < 0x30}
     tilemap = []
     for ty in range(64):
         for tx in range(32):
@@ -200,9 +203,12 @@ def validate():
         assert atlas.crop(rect).tobytes() == original.crop(rect).tobytes(), i
     tilemap = struct.unpack("<2048H", (DEST / "textbox_map.bin").read_bytes())
     assert max(tile & 0x3ff for tile in tilemap) < 0x90
+    assert not any(0x30 <= (tile & 0x3ff) < 0x40 for tile in tilemap), \
+        "Battle skin references tiles overwritten by tutorial message frames"
     assert {tile >> 12 for tile in tilemap} == {0, 1}
     print("Validated: original dimensions, 4bpp indices, no extra OBJ tiles/palettes")
     print("Validated: fixed cursor/confirmation indices and BG window boundary")
+    print("Validated: Oak/Old Man message-frame tile range is not referenced")
 
 
 if __name__ == "__main__":
