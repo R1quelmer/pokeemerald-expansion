@@ -1,9 +1,21 @@
 #include "global.h"
 #include "graphics.h"
 
+#ifdef FIRERED
+const u32 gBattleTextboxTiles[] = INCGFX_U32("graphics/battle_interface/firered/textbox.png", ".4bpp.smol");
+#else
 const u32 gBattleTextboxTiles[] = INCGFX_U32("graphics/battle_interface/textbox.png", ".4bpp.smol");
+#endif
+#ifdef FIRERED
+const u16 gBattleTextboxPalette[] = INCBIN_U16("graphics/battle_interface/firered/textbox.gbapal");
+#else
 const u16 gBattleTextboxPalette[] = INCBIN_U16("graphics/battle_interface/textbox.gbapal");
+#endif
+#ifdef FIRERED
+const u32 gBattleTextboxTilemap[] = INCGFX_U32("graphics/battle_interface/firered/textbox_map.bin", ".smolTM");
+#else
 const u32 gBattleTextboxTilemap[] = INCGFX_U32("graphics/battle_interface/textbox_map.bin", ".smolTM");
+#endif
 
 const u32 gUnusedGfx_OldCharmap[] = INCGFX_U32("graphics/unused/old_charmap.png", ".4bpp.smol"); // japanese table and bunch of stuff
 const u32 gUnusedTimemap_OldCharmap[] = INCGFX_U32("graphics/unused/old_charmap.bin", ".smolTM");
@@ -707,10 +719,35 @@ const u32 gUnusedTilemap_BasicFrame[] = INCGFX_U32("graphics/unused/basic_frame.
 
 // Battle Interface
 
+#ifdef FIRERED
+const u16 gBattleInterface_BallStatusBarPal[] = INCGFX_U16("graphics/battle_interface/firered/ball_status_bar.png", ".gbapal");
+#else
 const u16 gBattleInterface_BallStatusBarPal[] = INCGFX_U16("graphics/battle_interface/ball_status_bar.png", ".gbapal");
+#endif
 
+#ifdef FIRERED
+const u16 gBattleInterface_BallDisplayPal[] = INCGFX_U16("graphics/battle_interface/firered/ball_display.png", ".gbapal");
+#else
 const u16 gBattleInterface_BallDisplayPal[] = INCGFX_U16("graphics/battle_interface/ball_display.png", ".gbapal");
+#endif
 
+#ifdef FIRERED
+const u8 gHealthboxElementsGfxTable[][32] = INCBIN_U8("graphics/battle_interface/firered/hpbar.4bpp",
+                                                  "graphics/battle_interface/firered/expbar.4bpp",
+                                                  "graphics/battle_interface/status.4bpp",
+                                                  "graphics/battle_interface/firered/misc.4bpp",
+                                                  "graphics/battle_interface/firered/hpbar_anim.4bpp",
+                                                  "graphics/battle_interface/firered/misc_frameend.4bpp",
+                                                  "graphics/battle_interface/firered/ball_display.4bpp",
+                                                  "graphics/battle_interface/ball_caught_indicator.4bpp",
+                                                  "graphics/battle_interface/status2.4bpp", // these three duplicate sets of graphics are for the opponent/partner Pokémon
+                                                  "graphics/battle_interface/status3.4bpp",
+                                                  "graphics/battle_interface/status4.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_player_frameend.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_player_frameend_bar.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_opponent_frameend.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_opponent_frameend_bar.4bpp");
+#else
 const u8 gHealthboxElementsGfxTable[][32] = INCBIN_U8("graphics/battle_interface/hpbar.4bpp",
                                                   "graphics/battle_interface/expbar.4bpp",
                                                   "graphics/battle_interface/status.4bpp",
@@ -726,6 +763,7 @@ const u8 gHealthboxElementsGfxTable[][32] = INCBIN_U8("graphics/battle_interface
                                                   "graphics/battle_interface/healthbox_doubles_player_frameend_bar.4bpp",
                                                   "graphics/battle_interface/healthbox_doubles_opponent_frameend.4bpp",
                                                   "graphics/battle_interface/healthbox_doubles_opponent_frameend_bar.4bpp");
+#endif
 const u32 gBattleInterfaceGfx_UnusedWindow3[] = INCGFX_U32("graphics/battle_interface/unused_window3.png", ".4bpp.smol");
 const u32 gBattleInterfaceGfx_UnusedWindow4[] = INCGFX_U32("graphics/battle_interface/unused_window4.png", ".4bpp.smol");
 
@@ -1000,12 +1038,36 @@ const u16 gBattleAnimSpritePal_Eye[] = INCGFX_U16("graphics/battle_anims/sprites
 const u32 gBattleAnimSpriteGfx_Tendrils[] = INCGFX_U32("graphics/battle_anims/sprites/tendrils.png", ".4bpp.smol");
 const u16 gBattleAnimSpritePal_Tendrils[] = INCGFX_U16("graphics/battle_anims/sprites/tendrils.png", ".gbapal");
 
+#ifdef FIRERED
+const u32 gHealthboxSinglesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_singles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#else
 const u32 gHealthboxSinglesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_singles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxSinglesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_singles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#else
 const u32 gHealthboxSinglesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_singles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxSinglesOpponentLargeGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_singles_opponent_large.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#else
 const u32 gHealthboxSinglesOpponentLargeGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_singles_opponent_large.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxDoublesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_doubles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#else
 const u32 gHealthboxDoublesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_doubles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxDoublesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_doubles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#else
 const u32 gHealthboxDoublesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_doubles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxSafariGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_safari.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#else
 const u32 gHealthboxSafariGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_safari.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#endif
 
 const u32 gUnusedGfx_Shadow[] = INCGFX_U32("graphics/unused/shadow.png", ".4bpp.smol");
 const u16 gUnusedPal_Shadow[] = INCGFX_U16("graphics/unused/shadow.png", ".gbapal");
@@ -1349,7 +1411,11 @@ const u16 gDomeTourneyMatchCardBg_Pal[] = INCGFX_U16("graphics/battle_frontier/t
 const u32 gBattleArenaJudgmentSymbolsGfx[] = INCGFX_U32("graphics/battle_frontier/arena_judgment_symbols.png", ".4bpp.smol");
 const u16 gBattleArenaJudgmentSymbolsPalette[] = INCGFX_U16("graphics/battle_frontier/arena_judgment_symbols.png", ".gbapal");
 
+#ifdef FIRERED
+const u16 gBattleWindowTextPalette[] = INCGFX_U16("graphics/battle_interface/firered/text.pal", ".gbapal");
+#else
 const u16 gBattleWindowTextPalette[] = INCGFX_U16("graphics/battle_interface/text.pal", ".gbapal");
+#endif
 const u16 gPPTextPalette[] = INCGFX_U16("graphics/battle_interface/text_pp.pal", ".gbapal");
 
 const u16 gTilesetAnims_BattleDomePals0_0[] = INCGFX_U16("graphics/battle_frontier/dome_anim1.pal", ".gbapal");
