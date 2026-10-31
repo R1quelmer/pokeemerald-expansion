@@ -9,20 +9,20 @@ pending until the current menu and encounter checks are stable.
 
 | Area | Controller / asset entry points | Status |
 | --- | --- | --- |
-| Battle and intro | battle_bg.c, battle_interface.c, battle_controller_oak_old_man.c; graphics/battle_interface/firered | First-battle-flags capture clean; real lab trigger validation in progress |
+| Battle and intro | battle_bg.c, battle_interface.c, battle_controller_oak_old_man.c; graphics/battle_interface/firered | Real lab trigger, Blue intro, battle victory and return captured cleanly |
 | Title | title_screen_frlg.c; graphics/title_screen_frlg/firered | Audit complete; design pending |
 | Continue/New Game | main_menu.c; graphics/ui/firered/main_* | Background and softer selection contrast captured; Continue details retained |
-| Pause/save | start_menu.c; shared text_window.c frames | Audit complete; redesign pending |
+| Pause/save | start_menu.c; shared text_window.c frames | Wider FireRed panel/header and field-to-Bag return captured |
 | Options | option_menu.c; graphics/ui/firered/options_text.pal | Legibility/contrast refined and captured; settings retain original behavior |
 | Party | party_menu.c, firered_party_grid.h; graphics/ui/firered/party_card* | Grid and 1..6-party interactions captured; fainted/status/item and special layouts checked |
-| Summary | pokemon_summary_screen.c; graphics/summary_screen | Info, stats and populated moves captured cleanly; visual redesign pending |
-| Bag | item_menu.c; graphics/ui/firered/bag* | All pockets and actions captured; pocket accent timing correction under validation |
+| Summary | pokemon_summary_screen.c; graphics/summary_screen | New neutral/red/blue/violet panels captured; pagination, move details, egg and status/item checked |
+| Bag | item_menu.c; graphics/ui/firered/bag* | All pockets, accent timing, actions and normal field return captured |
 | Dex | pokedex.c / pokedex_plus_hgss.c, include/config/pokedex_plus_hgss.h | Variant selection must be respected; redesign pending |
 | Trainer Card | trainer_card.c; graphics/trainer_card/frlg | FRLG-specific implementation; redesign pending |
 | Naming | naming_screen.c; graphics/naming_screen | Shared controller; redesign pending |
-| PC/storage | pokemon_storage_system.c; graphics/pokemon_storage | Correct controller captured; FireRed shell adaptation under validation |
-| Messages/signs/shop | text_window.c, field_message_box.c, shop.c | FireRed geometric frames prepared; runtime review pending |
-| Overworld | data/maps, data/layouts, data/tilesets, graphics/tilesets | Prototype pending UI consolidation |
+| PC/storage | pokemon_storage_system.c; graphics/pokemon_storage | FireRed shell, populated box, cursor and action menu captured |
+| Messages/signs/shop | text_window.c, field_message_box.c, shop.c | Shared frames seen in menus and Oak tutorial; broader signs/shop review pending |
+| Overworld | data/maps, data/layouts, data/tilesets | Prototype pending UI consolidation |
 
 Except for explicitly selected FRLG resources (title/card/maps), controllers
 and many graphics are shared with Emerald/LeafGreen. Prefer FireRed-specific
@@ -66,7 +66,9 @@ The normal build does not compile the fixtures. `gVisualQaScene` selects a
 screen when the main menu first opens: 0 main menu, 1 options, 2 party,
 3 summary, 4 bag, 5 dex, 6 card, 7 naming, 8 PC, 9 first-battle flags;
 10 actual Oak lab rival coordinate trigger, 11..16 parties of 1..6 mons,
-17 fainted/status/held-item party, 18..21 other pockets, 22..23 summary pages.
+17 fainted/status/held-item party, 18..21 other pockets, 22..23 summary pages;
+24 double layout, 25 full-multi layout, 26 Party-to-Summary flow,
+27 Continue/Options return, 28 egg, 29 Summary status/item, 30 field pause/Bag return.
 
 The headless mGBA runner captures real framebuffer PNGs from each fixture.
 Fixture 9 exercises the first-battle resource allocation; it is not a complete
@@ -129,3 +131,30 @@ captured; no linked multiplayer session was exercised.
 Clean build jobs for FireRed, Emerald and LeafGreen passed at fe7f870 and
 cb348d2. Screenshot workflow 41234108386 passed. PC shell f6ad70e is being
 validated separately before any further UI expansion.
+
+
+## Verified code checkpoint 86e8b69
+
+FireRed visual QA run 41235867529 completed successfully. Its actual framebuffer
+captures confirm the Summary redesign and correct pagination palette, populated
+move details, egg and held-item/status displays, Continue/Options round-trip,
+and normal field pause -> Bag -> pause -> field. Pause uses a dark MENU header
+and a wider label panel; headerless layouts keep the original row origin.
+
+The Summary's controller preserves destination palette bits when updating
+pagination tile numbers. New info/egg maps therefore retain bank 4 in that
+region. The asset checker asserts this, checks pixel/palette reproducibility,
+and confirms that the original 240 Summary tiles remain byte-equivalent in
+hardware indices. The new atlas contains 272 tiles.
+
+Code checkpoint 86e8b69d869219d25fbd6fb35df977d66109ad4a passed clean build jobs
+for FireRed (124639406913), Emerald (124639406695) and LeafGreen (124639406939)
+in CI run 41235867451. Native grid checks and asset checks passed in the visual
+QA job. The general battle test job was still running when this checkpoint
+was documented; its result is not claimed here.
+
+This is a consolidated menu checkpoint, not the completion of the broad visual
+overhaul. Dex, trainer card, naming, title, broader secondary screens and the
+overworld proof of concept remain. No real linked multiplayer session or old
+save migration was tested. No starter/rival customization or BPS source file
+was modified relative to a361b25.
