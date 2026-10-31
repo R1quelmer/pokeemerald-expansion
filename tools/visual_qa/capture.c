@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 29; ++scene)
+    for (unsigned scene = 0; scene <= 30; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -94,6 +94,13 @@ int main(int argc, char **argv)
                     if (age == 1100 || age == 1101) keys = 16;
                     if (age == 1400 || age == 1401) keys = 2;
                 }
+                if (scene == 30)
+                {
+                    if (age == 240 || age == 241) keys = 8;
+                    if (age == 420 || age == 421 || age == 540 || age == 541) keys = 128;
+                    if (age == 660 || age == 661) keys = 1;
+                    if (age == 1200 || age == 1201 || age == 1600 || age == 1601) keys = 2;
+                }
                 core->setKeys(core, keys);
             }
             core->runFrame(core);
@@ -108,7 +115,7 @@ int main(int argc, char **argv)
                     && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30)
                 || (scene == 26 && readyFrame && frame - readyFrame >= 360
                     && frame - readyFrame <= 1800 && (frame - readyFrame) % 60 == 30)
-                || ((scene == 23 || scene == 27) && readyFrame && frame - readyFrame >= 360
+                || ((scene == 23 || scene == 27 || scene == 30) && readyFrame && frame - readyFrame >= 360
                     && frame - readyFrame <= 1800 && (frame - readyFrame) % 60 == 30))
             {
                 char path[512];

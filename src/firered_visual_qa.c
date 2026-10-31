@@ -138,6 +138,14 @@ bool8 TryInitFireRedVisualQA(void)
     case 22: case 23: case 28: case 29:
         ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
     case 27: SetMainCallback2(CB2_ReinitMainMenu); break;
+    case 30:
+        FlagSet(FLAG_SYS_POKEMON_GET);
+        SetWarpDestination(MAP_GROUP(MAP_PALLET_TOWN_PLAYERS_HOUSE_2F),
+            MAP_NUM(MAP_PALLET_TOWN_PLAYERS_HOUSE_2F), WARP_ID_NONE, 6, 6);
+        WarpIntoMap();
+        gFieldCallback = FieldCB_WarpExitFadeFromBlack;
+        SetMainCallback2(CB2_LoadMap);
+        break;
     case 5: SetMainCallback2(CB2_OpenPokedex); break;
     case 6: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
     case 7: DoNamingScreen(NAMING_SCREEN_PLAYER, gSaveBlock2Ptr->playerName, 0, 0, 0, ReturnFromVisualQA); break;

@@ -397,7 +397,11 @@ void DisplayYesNoMenuWithDefault(u8 initialCursorPos)
 u8 AddStartMenuWindow(u8 numActions)
 {
     if (sStartMenuWindowId == WINDOW_NONE)
+#ifdef FIRERED
+        sStartMenuWindowId = AddWindowParameterized(0, 20, 1, 9, (numActions * 2) + (numActions <= 7 ? 3 : 2), 15, 0x139);
+#else
         sStartMenuWindowId = AddWindowParameterized(0, 22, 1, 7, (numActions * 2) + 2, 15, 0x139);
+#endif
     return sStartMenuWindowId;
 }
 
