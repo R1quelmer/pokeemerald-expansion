@@ -36,17 +36,17 @@ bool8 TryInitFireRedVisualQA(void)
     sPrepared = TRUE;
     Sav2_ClearSetDefault();
     NewGameInitData();
-    StringCopy(gSaveBlock2Ptr->playerName, _("RED"));
-    StringCopy(gSaveBlock1Ptr->rivalName, _("BLUE"));
+    StringCopy(gSaveBlock2Ptr->playerName, COMPOUND_STRING("RED"));
+    StringCopy(gSaveBlock1Ptr->rivalName, COMPOUND_STRING("BLUE"));
     const enum Species species[] = {SPECIES_TREECKO, SPECIES_TOTODILE,
         SPECIES_FENNEKIN, SPECIES_SCEPTILE, SPECIES_FERALIGATR, SPECIES_DELPHOX};
     for (u32 i = 0; i < PARTY_SIZE; i++)
     {
-        CreateMon(&gPlayerParty[i], species[i], 25 + i * 5, 31, FALSE, 0, OT_ID_PLAYER_ID, 0);
+        CreateMonWithIVs(&gParties[B_TRAINER_PLAYER][i], species[i], 25 + i * 5, 0, OTID_STRUCT_PLAYER_ID, 31);
         GetSetPokedexFlag(SpeciesToNationalPokedexNum(species[i]), FLAG_SET_SEEN);
         GetSetPokedexFlag(SpeciesToNationalPokedexNum(species[i]), FLAG_SET_CAUGHT);
     }
-    gPlayerPartyCount = PARTY_SIZE;
+    gPartiesCount[B_TRAINER_PLAYER] = PARTY_SIZE;
     AddBagItem(ITEM_POTION, 12);
     AddBagItem(ITEM_POKE_BALL, 20);
     AddBagItem(ITEM_RARE_CANDY, 3);
@@ -57,7 +57,7 @@ bool8 TryInitFireRedVisualQA(void)
     {
     case 1: SetMainCallback2(CB2_InitOptionMenu); break;
     case 2: SetMainCallback2(CB2_PartyMenuFromStartMenu); break;
-    case 3: ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gPlayerParty, 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
+    case 3: ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
     case 4: GoToBagMenu(ITEMMENULOCATION_FIELD, POCKET_ITEMS, ReturnFromVisualQA); break;
     case 5: SetMainCallback2(CB2_OpenPokedex); break;
     case 6: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
@@ -65,7 +65,7 @@ bool8 TryInitFireRedVisualQA(void)
     case 8: ShowPokemonStorageSystemPC(); break;
     case 9:
         ZeroEnemyPartyMons();
-        CreateMon(&gEnemyParty[0], SPECIES_FENNEKIN, 5, 31, FALSE, 0, OT_ID_PLAYER_ID, 0);
+        CreateMonWithIVs(&gParties[B_TRAINER_OPPONENT_A][0], SPECIES_FENNEKIN, 5, 0, OTID_STRUCT_PLAYER_ID, 31);
         gBattleTypeFlags = BATTLE_TYPE_FIRST_BATTLE;
         SetMainCallback2(CB2_InitBattle);
         break;
