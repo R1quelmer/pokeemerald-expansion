@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
         mCoreInitConfig(core, NULL);
-        mCoreConfigSetDefaultInt(&core->config, "skipBios", 1);
+        mCoreConfigSetDefaultIntValue(&core->config, "skipBios", 1);
         core->loadConfig(core, &core->config);
         color_t *pixels = calloc(256 * 256, sizeof(color_t));
         if (!pixels || !mCoreLoadFile(core, argv[1])) return 4;
