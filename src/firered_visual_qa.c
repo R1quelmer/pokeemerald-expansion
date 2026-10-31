@@ -126,7 +126,10 @@ bool8 TryInitFireRedVisualQA(void)
     case 5: SetMainCallback2(CB2_OpenPokedex); break;
     case 6: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
     case 7: DoNamingScreen(NAMING_SCREEN_PLAYER, gSaveBlock2Ptr->playerName, 0, 0, 0, ReturnFromVisualQA); break;
-    case 8: FireRedVisualQA_OpenStorage(); break;
+    case 8:
+        for (u32 i = 0; i < PARTY_SIZE; i++)
+            SetBoxMonAt(0, i, &gParties[B_TRAINER_PLAYER][i].box);
+        FireRedVisualQA_OpenStorage(); break;
     case 9:
         ZeroEnemyPartyMons();
         CreateMonWithIVs(&gParties[B_TRAINER_OPPONENT_A][0], SPECIES_FENNEKIN, 5, 0, OTID_STRUCT_PLAYER_ID, 31);

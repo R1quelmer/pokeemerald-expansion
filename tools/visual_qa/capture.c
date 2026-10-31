@@ -72,6 +72,12 @@ int main(int argc, char **argv)
                     if (age == 1560 || age == 1561) keys = 1;
                     if (age == 1680 || age == 1681 || age == 1800 || age == 1801) keys = 2;
                 }
+                if (scene == 8)
+                {
+                    if (age == 600 || age == 601) keys = 16;
+                    if (age == 780 || age == 781) keys = 1;
+                    if (age == 960 || age == 961) keys = 2;
+                }
                 core->setKeys(core, keys);
             }
             core->runFrame(core);
@@ -80,7 +86,9 @@ int main(int argc, char **argv)
                 || (scene >= 11 && scene <= 17 && readyFrame && frame - readyFrame >= 360
                     && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30)
                 || (scene == 4 && readyFrame && frame - readyFrame >= 360
-                    && frame - readyFrame <= 1860 && (frame - readyFrame) % 60 == 30))
+                    && frame - readyFrame <= 1860 && (frame - readyFrame) % 60 == 30)
+                || (scene == 8 && readyFrame && frame - readyFrame >= 360
+                    && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30))
             {
                 char path[512];
                 snprintf(path, sizeof(path), "%s/scene-%02u-frame-%04u.png", argv[2], scene, frame);

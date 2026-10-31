@@ -2055,8 +2055,13 @@ const u32 gKantoTrainerCardFrontLink_Tilemap[] = INCGFX_U32("graphics/trainer_ca
 
 // Pokémon storage system
 
+#ifdef FIRERED
+const u32 gStorageSystemMenu_Gfx[] = INCGFX_U32("graphics/ui/firered/storage_menu.png", ".4bpp.smol");
+const u16 gStorageSystemPartyMenu_Pal[] = INCGFX_U16("graphics/ui/firered/storage_party.pal", ".gbapal");
+#else
 const u32 gStorageSystemMenu_Gfx[] = INCGFX_U32("graphics/pokemon_storage/menu.png", ".4bpp.smol");
 const u16 gStorageSystemPartyMenu_Pal[] = INCGFX_U16("graphics/pokemon_storage/party_menu.pal", ".gbapal");
+#endif
 const u32 gStorageSystemPartyMenu_Tilemap[] = INCGFX_U32("graphics/pokemon_storage/party_menu.bin", ".smolTM");
 
 // naming screen

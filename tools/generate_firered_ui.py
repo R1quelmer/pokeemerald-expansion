@@ -56,6 +56,32 @@ def bag_background():
           BLUE,(248,200,112),PAPER,VIOLET,(192,160,224),BLUE,RED,(248,144,160)]
     (OUT/'bag.pal').write_text('JASC-PAL\n0100\n32\n'+'\n'.join('%d %d %d'%c for c in cols+text)+'\n',newline='\n')
 
+def storage_shell():
+    # Keep every controller-addressed tile and glyph at its original index.
+    # The source preview uses two palette banks; hardware pixels use the low nibble.
+    im=Image.open(ROOT/'graphics/pokemon_storage/menu.png').point(lambda p:p&15)
+    colors=[INK,INK,INK,MUTED,INK,BLUE,MUTED,INK,INK,BLUE,BLUE,
+            INK,PAPER,PAPER,PAPER,BLUE]
+    corner=Image.new('P',(8,8),1);d=ImageDraw.Draw(corner)
+    d.polygon([(4,0),(7,0),(7,7),(0,7),(0,4)],fill=5)
+    d.polygon([(5,2),(7,2),(7,7),(2,7),(2,5)],fill=14)
+    edge=Image.new('P',(8,8),14);d=ImageDraw.Draw(edge)
+    d.line((0,0,7,0),fill=1);d.line((0,1,7,1),fill=5)
+    for tile,img in [(11,corner),(12,edge),(13,corner.transpose(Image.Transpose.FLIP_LEFT_RIGHT)),
+                     (28,Image.new('P',(8,8),14)),(29,Image.new('P',(8,8),14))]:
+        im.paste(img,(tile%16*8,tile//16*8))
+    save(OUT/'storage_menu.png',im,colors)
+    palette(OUT/'storage_interface.pal',colors)
+    gray=colors.copy();gray[5]=MUTED;gray[14]=MUTED
+    palette(OUT/'storage_inactive.pal',gray)
+    scroll=[INK,INK,PAPER,INK,BLUE,BLUE,RED,RED,INK,(40,40,48),INK]+[(0,0,0)]*5
+    palette(OUT/'storage_canvas.pal',scroll)
+    text=[INK,PAPER,INK,PAPER]+[(0,0,0)]*6+[PAPER,INK,MUTED,BLUE,PAPER,INK]
+    palette(OUT/'storage_text.pal',text)
+    party=[INK,INK,(24,96,136),INK,BLUE,(24,96,136),MUTED,BLUE,PAPER,
+           PAPER,BLUE,(24,96,136),BLUE,INK,BLUE,INK]
+    palette(OUT/'storage_party.pal',party)
+
 def main():
     frames=OUT/'frames';frames.mkdir(parents=True,exist_ok=True)
     colors=[(0,0,0),PAPER,INK,MUTED,RED,(248,144,160),GREEN,(152,224,184),
@@ -111,6 +137,7 @@ def main():
     option=[(0,0,0),PAPER,INK,PAPER,BLUE,PAPER,INK,PAPER,INK,BLUE]+[(0,0,0)]*6
     palette(OUT/'options_text.pal',option)
     bag_background()
+    storage_shell()
     party_colors=[(0,0,0),(40,40,48),(32,32,40),PAPER,INK,RED,MUTED,
                   (40,40,48),(40,40,48),GREEN,(112,232,152),BLUE,
                   (144,208,240),RED,(248,144,160),PAPER]
