@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 25; ++scene)
+    for (unsigned scene = 0; scene <= 26; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -46,7 +46,8 @@ int main(int argc, char **argv)
                 if (scene == 10)
                 {
                     if (age >= 180 && age < 196) keys = 128; /* DOWN onto real map trigger */
-                    if (age >= 240 && age % 45 < 2) keys = 1; /* A through dialogue and battle */
+                    if (age >= 240 && age % 45 < 2 && !(age >= 1000 && age < 1300))
+                        keys = 1; /* Pause on the complete trainer challenge, then continue. */
                 }
                 if (scene >= 11 && scene <= 17)
                 {
@@ -78,17 +79,26 @@ int main(int argc, char **argv)
                     if (age == 780 || age == 781) keys = 1;
                     if (age == 960 || age == 961) keys = 2;
                 }
+                if (scene == 26)
+                {
+                    if (age == 420 || age == 421 || age == 540 || age == 541) keys = 1;
+                    if (age == 900 || age == 901 || age == 1100 || age == 1101) keys = 16;
+                    if (age == 1500 || age == 1501 || age == 1700 || age == 1701) keys = 2;
+                }
                 core->setKeys(core, keys);
             }
             core->runFrame(core);
             if (frame == 1800 || frame == 2300 || frame == frameCount - 1
                 || (scene == 10 && frame >= 300 && frame % 60 == 0)
+                || (scene == 10 && frame >= 1400 && frame <= 2600 && frame % 15 == 0)
                 || (scene >= 11 && scene <= 17 && readyFrame && frame - readyFrame >= 360
                     && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30)
                 || (scene == 4 && readyFrame && frame - readyFrame >= 360
                     && frame - readyFrame <= 1860 && (frame - readyFrame) % 60 == 30)
                 || (scene == 8 && readyFrame && frame - readyFrame >= 360
-                    && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30))
+                    && frame - readyFrame <= 1020 && (frame - readyFrame) % 60 == 30)
+                || (scene == 26 && readyFrame && frame - readyFrame >= 360
+                    && frame - readyFrame <= 1800 && (frame - readyFrame) % 60 == 30))
             {
                 char path[512];
                 snprintf(path, sizeof(path), "%s/scene-%02u-frame-%04u.png", argv[2], scene, frame);

@@ -4,23 +4,23 @@
 
 This is an ongoing overhaul. A successful build is not visual approval.
 The first deliverable fixes the first-battle frame collision and adds opt-in
-emulator screenshots. Menus and overworld remain pending until implemented
-and inspected; this document does not claim that they are redesigned.
+emulator screenshots. Menu work is being consolidated with actual mGBA captures. Overworld remains
+pending until the current menu and encounter checks are stable.
 
 | Area | Controller / asset entry points | Status |
 | --- | --- | --- |
-| Battle and intro | battle_bg.c, battle_interface.c, battle_controller_oak_old_man.c; graphics/battle_interface/firered | First-battle fix prepared; emulator review pending |
+| Battle and intro | battle_bg.c, battle_interface.c, battle_controller_oak_old_man.c; graphics/battle_interface/firered | First-battle-flags capture clean; real lab trigger validation in progress |
 | Title | title_screen_frlg.c; graphics/title_screen_frlg/firered | Audit complete; design pending |
-| Continue/New Game | main_menu.c; graphics/ui/firered/main_* | New composition prepared; runtime review pending |
+| Continue/New Game | main_menu.c; graphics/ui/firered/main_* | Background and softer selection contrast captured; Continue details retained |
 | Pause/save | start_menu.c; shared text_window.c frames | Audit complete; redesign pending |
-| Options | option_menu.c; graphics/ui/firered/options_text.pal | Header, row dividers and accents prepared; runtime review pending |
-| Party | party_menu.c, data/party_menu.h; graphics/party_menu | Audit complete; redesign pending |
-| Summary | pokemon_summary_screen.c; graphics/summary_screen | Audit complete; redesign pending |
-| Bag | item_menu.c; graphics/bag | Audit complete; redesign pending |
-| Dex | pokedex.c / pokedex_plus_hgss.c, config/pokedex.h | Variant selection must be respected; redesign pending |
+| Options | option_menu.c; graphics/ui/firered/options_text.pal | Legibility/contrast refined and captured; settings retain original behavior |
+| Party | party_menu.c, firered_party_grid.h; graphics/ui/firered/party_card* | Grid and 1..6-party interactions captured; fainted/status/item and special layouts checked |
+| Summary | pokemon_summary_screen.c; graphics/summary_screen | Info, stats and populated moves captured cleanly; visual redesign pending |
+| Bag | item_menu.c; graphics/ui/firered/bag* | All pockets and actions captured; pocket accent timing correction under validation |
+| Dex | pokedex.c / pokedex_plus_hgss.c, include/config/pokedex_plus_hgss.h | Variant selection must be respected; redesign pending |
 | Trainer Card | trainer_card.c; graphics/trainer_card/frlg | FRLG-specific implementation; redesign pending |
 | Naming | naming_screen.c; graphics/naming_screen | Shared controller; redesign pending |
-| PC/storage | pokemon_storage_system.c; graphics/pokemon_storage | Shared controller; redesign pending |
+| PC/storage | pokemon_storage_system.c; graphics/pokemon_storage | Correct controller captured; FireRed shell adaptation under validation |
 | Messages/signs/shop | text_window.c, field_message_box.c, shop.c | FireRed geometric frames prepared; runtime review pending |
 | Overworld | data/maps, data/layouts, data/tilesets, graphics/tilesets | Prototype pending UI consolidation |
 
@@ -55,14 +55,18 @@ The skin allocator now starts at 0x40 and its deduplication excludes the
 tutorial range. Validation forbids BG map references to 0x30..0x3f. Fixed
 cursor/confirmation indices are retained. The atlas size remains 128x128,
 the map 4096 bytes, and 98 occupied slots stay below window tile 0x90.
-This explains the supplied corruption; runtime confirmation is still required.
+The first-battle-flags capture no longer has the striped border. The real
+Oak lab rival encounter must still be checked through its original coordinate
+trigger, trainer setup and return script before this issue is closed.
 
 ## Emulator fixtures
 
 `make clean && make firered -j$(nproc) VISUAL_QA=1` builds a test-only ROM.
 The normal build does not compile the fixtures. `gVisualQaScene` selects a
 screen when the main menu first opens: 0 main menu, 1 options, 2 party,
-3 summary, 4 bag, 5 dex, 6 card, 7 naming, 8 PC, 9 first-battle flags.
+3 summary, 4 bag, 5 dex, 6 card, 7 naming, 8 PC, 9 first-battle flags;
+10 actual Oak lab rival coordinate trigger, 11..16 parties of 1..6 mons,
+17 fainted/status/held-item party, 18..21 other pockets, 22..23 summary pages.
 
 The headless mGBA runner captures real framebuffer PNGs from each fixture.
 Fixture 9 exercises the first-battle resource allocation; it is not a complete
@@ -79,3 +83,49 @@ correctly must be fixed; the presence of PNGs alone is not a passing test.
 Keep custom_frlg_starters.inc, customize_frlg_starters.py, make_patch.py,
 modern species/gimmicks and Kanto events intact. Commit by functional area.
 Run clean builds on fresh target-specific jobs. Record emulator gaps honestly.
+
+
+## Checkpoint 9c43759
+
+FireRed, Emerald and LeafGreen build jobs passed (push CI 41217774955 and PR
+CI 41217779287). Native navigation assertions passed for every party size
+1..6, ordinary and choose-half exits, and all directional inputs. Visual QA
+41217774915 produced real screenshots of the six-card party and new bag.
+These captures establish the base composition, not all interaction coverage.
+
+Remaining observed defects: direct Summary capture has overlapping text;
+old PC fixture called a field-only menu outside the overworld, returning to
+the main menu. Fixture fe7f870 resets title tasks before direct menu entry,
+uses the storage controller's real entry, enables a populated National Dex,
+and resumes the actual lab map before its rival coordinate trigger. Review
+its captures before interpreting either defect as a production regression.
+
+
+## Checkpoints fe7f870 and cb348d2
+
+The Summary overlap was caused by the isolated fixture retaining title-screen
+tasks. Resetting tasks before direct entry removes it: no Summary production
+controller change was required. Info, stats and moves now render cleanly.
+The fixture also explicitly grants initial moves, matching normal mon creation;
+its earlier empty move lists and Struggle-only battle were test-data defects.
+
+The real Oak lab map is loaded at the pre-battle position, then DOWN activates
+the existing coordinate trigger. Original approach, dialogue, trainerbattle,
+Oak tutorial, battle and return scripts execute unchanged. The correct Blue
+trainer and rival Fennekin are visible without the striped border; cb348d2
+finished with outcome 1 (victory) and returned to the lab. This is a checkpoint
+resume, not a full playthrough of the new-game/name/starter-selection sequence.
+
+Captured all five Bag pockets and the action submenu; cancel returns to Options
+in the isolated fixture. Accent updates originally used the previous pocket
+during animation; moving the update after the committed pocket change fixes
+that timing. The next captures must confirm every settled pocket color.
+
+Native grid assertions and actual party screenshots cover counts 1..6, opening
+actions, directional movement, cancel, fainted/poisoned mons and held items.
+Double and full-multi layouts keep their original arrangements and were also
+captured; no linked multiplayer session was exercised.
+
+Clean build jobs for FireRed, Emerald and LeafGreen passed at fe7f870 and
+cb348d2. Screenshot workflow 41234108386 passed. PC shell f6ad70e is being
+validated separately before any further UI expansion.

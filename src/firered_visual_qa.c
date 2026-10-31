@@ -113,7 +113,7 @@ bool8 TryInitFireRedVisualQA(void)
     {
     case 1: SetMainCallback2(CB2_InitOptionMenu); break;
     case 2: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_SINGLE, ReturnFromVisualQA); break;
-    case 11: case 12: case 13: case 14: case 15: case 16: case 17:
+    case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 26:
         FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_SINGLE, ReturnFromVisualQA); break;
     case 24: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_DOUBLE, ReturnFromVisualQA); break;
     case 25: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_MULTI_FULL, ReturnFromVisualQA); break;

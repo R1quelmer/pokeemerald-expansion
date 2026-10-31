@@ -1420,7 +1420,10 @@ static void ChangeBagPocketId(u8 *bagPocketId, s8 deltaBagPocketId)
 
     if (IsVictoryCatch() && *bagPocketId == POCKET_POKE_BALLS)
         *bagPocketId += 1;
-
+#ifdef FIRERED
+    if (bagPocketId == &gBagPosition.pocket)
+        UpdateFireRedBagAccent();
+#endif
 }
 
 static void SwitchBagPocket(u8 taskId, s16 deltaBagPocketId, bool16 skipEraseList)
@@ -1519,9 +1522,6 @@ static void DrawItemListBgRow(u8 y)
 
 static void DrawPocketIndicatorSquare(u8 x, bool8 isCurrentPocket)
 {
-#ifdef FIRERED
-    UpdateFireRedBagAccent();
-#endif
     if (!isCurrentPocket)
         FillBgTilemapBufferRect_Palette0(2, 0x1017, x + 5, 3, 1, 1);
     else
