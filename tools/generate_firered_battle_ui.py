@@ -8,6 +8,7 @@ Run from any directory: python3 tools/generate_firered_battle_ui.py
 from pathlib import Path
 import struct
 from PIL import Image, ImageDraw
+from firered_ui_theme import NAVY, PANEL, RAISED, BORDER, BLUE, CYAN, TEXT, SUBTEXT
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "graphics/battle_interface"
@@ -28,24 +29,20 @@ def save_palette(name, colors):
 
 # 12..15 are the four battlers' runtime status colors. 9/10 are gender,
 # 11 is EXP. Keep these roles: UpdateStatusIconInHealthbox patches 12..15.
-HEALTH = [(0, 0, 0), (32, 32, 40), (248, 248, 248), (224, 224, 232),
-          (192, 40, 64), (104, 104, 120), (40, 40, 48), (192, 40, 64),
-          (160, 160, 176), (48, 168, 224), (240, 104, 144), (48, 184, 232),
+HEALTH = [NAVY, TEXT, PANEL, RAISED,
+          BLUE, SUBTEXT, NAVY, CYAN,
+          BORDER, (48, 168, 224), (240, 104, 144), CYAN,
           (0, 0, 255), (0, 255, 0), (255, 0, 0), (106, 148, 255)]
-BAR = [(0, 0, 0), (32, 32, 40), (248, 248, 248), (224, 224, 232),
-       (144, 144, 160), (56, 56, 72), (40, 40, 48), (248, 208, 72),
+BAR = [NAVY, TEXT, PANEL, RAISED,
+       BORDER, PANEL, NAVY, (248, 208, 72),
        (248, 208, 72), (248, 208, 72), (48, 192, 112), (112, 232, 152),
        (232, 160, 40), (248, 208, 72), (208, 56, 72), (248, 104, 112)]
 # Text indices are part of BattleWindowText's ABI. Message/prompt: 1/6/15;
 # command/move/PP windows: 13/14/15. Do not remap dynamic type/PP colors.
-MESSAGE = [(0, 0, 0), (248, 248, 248), (224, 72, 96), (32, 32, 40),
-           (184, 40, 64), (248, 248, 248), (32, 32, 40), (224, 224, 232),
-           (56, 56, 72), (32, 32, 40), (128, 128, 144), (104, 104, 120),
-           (224, 72, 96), (184, 40, 64), (56, 56, 72), (32, 32, 40)]
-MENU = [(0, 0, 0), (32, 32, 40), (104, 104, 120), (224, 224, 232),
-        (40, 40, 48), (248, 248, 248), (48, 168, 224), (224, 224, 232),
-        (192, 40, 64), (184, 40, 64), (112, 80, 184), (152, 120, 224),
-        (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)]
+MESSAGE = [NAVY, TEXT, CYAN, PANEL, BLUE, TEXT, PANEL, SUBTEXT,
+           BORDER, PANEL, SUBTEXT, BORDER, CYAN, BLUE, BORDER, PANEL]
+MENU = [NAVY, BORDER, SUBTEXT, RAISED, NAVY, PANEL, CYAN, SUBTEXT,
+        BLUE, BLUE, BLUE, CYAN, NAVY, NAVY, NAVY, NAVY]
 
 
 def healthboxes():
@@ -60,7 +57,7 @@ def healthboxes():
         tall = old.height == 64
         left, right = (9, 102) if player else (1, 94)
         bottom = 34 if tall else 26
-        # Angular silhouette, a flat paper surface and two-pixel color rail.
+        # Angular silhouette, a navy surface and two-pixel color rail.
         outline = [(left + 5, 2), (right - 5, 2), (right, 7),
                    (right, bottom - 5), (right - 5, bottom),
                    (left, bottom), (left, 7)]
@@ -182,8 +179,7 @@ def textbox():
     save_palette("textbox_0", MESSAGE)
     save_palette("textbox_1", MENU)
     colors = [tuple(map(int, line.split())) for line in (SOURCE / "text.pal").read_text().splitlines()[3:]]
-    colors[11:16] = [(168, 168, 184), (80, 80, 96), (32, 32, 40),
-                     (248, 248, 248), (248, 248, 248)]
+    colors[11:16] = [SUBTEXT, TEXT, TEXT, PANEL, PANEL]
     save_palette("text", colors)
     print(f"FireRed battle BG: {len(tiles)} unique tiles, limit 144; map 4096 bytes")
 

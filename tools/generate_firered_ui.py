@@ -4,6 +4,7 @@ from pathlib import Path
 import struct
 from PIL import Image, ImageDraw
 from firered_ui_theme import NAVY, PANEL, RAISED, BORDER, BLUE, CYAN, TEXT, SUBTEXT, WARNING
+from generate_firered_secondary_ui import generate as secondary_screens
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'graphics/ui/firered'
@@ -90,7 +91,8 @@ def summary_panels():
     colors=[]
     for bank,accent in enumerate([BLUE,BLUE,BLUE,BLUE,BLUE,BLUE]):
         cols=[tuple(original_palette[i:i+3]) for i in range(bank*48,(bank+1)*48,3)]
-        cols[1:7]=[BORDER,PANEL,NAVY,RAISED,TEXT,PANEL]
+        cols[0]=NAVY
+        cols[1:7]=[BORDER,PANEL,NAVY,RAISED,PANEL,PANEL]
         cols[7:16]=[accent,accent,accent,accent,accent,PANEL,BORDER,SUBTEXT,NAVY]
         if bank==4: # Pagination symbols retain their contrast roles.
             cols[1:10]=[BLUE,NAVY,NAVY,CYAN,CYAN,NAVY,NAVY,NAVY,NAVY]
@@ -114,13 +116,13 @@ def summary_panels():
         d.polygon([(4,19),(71,19),(75,23),(75,153),(4,153)],fill=2)
         d.rectangle((0,18,2,159),fill=7)
         d.line((80,16,80,159),fill=1)
-        headers=[24,64,104] if name.startswith('info') else ([24,48,104] if name=='skills' else [24,112])
+        headers=[16,64,104] if name.startswith('info') else ([16,48,104] if name=='skills' else [16,112])
         for y in headers:
-            bottom=(63 if y==24 else 103 if y==64 else 159) if name.startswith('info') else (47 if y==24 else 103 if y==48 else 159)
-            if 'moves' in name:bottom=95 if y==24 else 159
+            bottom=(63 if y==16 else 103 if y==64 else 159) if name.startswith('info') else (47 if y==16 else 103 if y==48 else 159)
+            if 'moves' in name:bottom=111 if y==16 else 159
             d.polygon([(84,y),(235,y),(239,y+4),(239,bottom),(83,bottom),(83,y+1)],fill=1)
-            d.rectangle((85,y+8,237,bottom-1),fill=2)
-            d.rectangle((84,y,238,y+7),fill=7)
+            d.rectangle((85,y+16,237,bottom-1),fill=2)
+            d.rectangle((84,y,238,y+15),fill=7)
         for y in range(20):
             for x in range(30):
                 if not name.startswith('info') and (x<10 or y<2):continue
@@ -196,6 +198,7 @@ def main():
     bag_background()
     storage_shell()
     summary_panels()
+    secondary_screens(ROOT, OUT, palette)
     party_colors=[NAVY,PANEL,NAVY,TEXT,NAVY,CYAN,BORDER,
                   PANEL,PANEL,GREEN,(112,232,152),BLUE,CYAN,WARNING,SUBTEXT,TEXT]
     for hide_hp in [False, True]:

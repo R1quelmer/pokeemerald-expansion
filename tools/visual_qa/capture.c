@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 31; ++scene)
+    for (unsigned scene = 0; scene <= 42; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         core->setVideoBuffer(core, pixels, 256);
         core->reset(core);
         unsigned readyFrame = 0;
-        unsigned frameCount = scene == 10 ? 12000 : scene == 31 ? 10000 : 2800;
+        unsigned frameCount = scene == 10 ? 12000 : scene == 31 ? 10000 : scene == 39 ? 4800 : 2800;
         for (unsigned frame = 0; frame < frameCount; ++frame)
         {
             /* Copyright/intro/title advance with START, then fixture launch.
@@ -45,6 +45,52 @@ int main(int argc, char **argv)
                 unsigned keys = 0;
                 if (scene == 31 && age >= 180 && age % 60 < 2)
                     keys = 1;
+                if (scene == 33)
+                {
+                    if (age == 600 || age == 601 || age == 900 || age == 901) keys = 16;
+                    if (age == 1100 || age == 1101) keys = 1;
+                    if (age == 1400 || age == 1401 || age == 1660 || age == 1661
+                        || age == 1900 || age == 1901) keys = 128;
+                }
+                if (scene == 34 || scene == 42)
+                {
+                    if (age >= 420 && age < 720 && age % 60 < 2) keys = 128;
+                    if (age == 900 || age == 901) keys = 1;
+                    if (age == 1100 || age == 1101) keys = 2;
+                }
+                if (scene == 35)
+                {
+                    if (age >= 420 && age < 900 && age % 12 < 2) keys = 128;
+                    if (age == 1100 || age == 1101 || age == 1400 || age == 1401
+                        || age == 1700 || age == 1701 || age == 2000 || age == 2001) keys = 16;
+                }
+                if (scene == 37)
+                {
+                    if (age == 420 || age == 421 || age == 840 || age == 841
+                        || age == 1020 || age == 1021) keys = 1;
+                    if (age == 660 || age == 661) keys = 128;
+                    if (age == 1200 || age == 1201 || age == 1500 || age == 1501
+                        || age == 1700 || age == 1701) keys = 2;
+                }
+                if (scene == 38)
+                {
+                    if (age == 420 || age == 421 || age == 960 || age == 961) keys = 2;
+                    if (age == 600 || age == 601 || age == 1200 || age == 1201) keys = 1;
+                    if (age == 780 || age == 781 || age == 1400 || age == 1401) keys = 4;
+                }
+                if (scene == 39)
+                {
+                    if (age == 420 || age == 421 || age == 720 || age == 721
+                        || age == 1520 || age == 1521 || age == 2220 || age == 2221) keys = 1;
+                    if (age == 1100 || age == 1101 || age == 1900 || age == 1901) keys = 2;
+                    if (age == 1400 || age == 1401 || age == 2100 || age == 2101) keys = 16;
+                }
+                if (scene == 40)
+                {
+                    if (age == 420 || age == 421) keys = 4;
+                    if (age == 720 || age == 721 || age == 900 || age == 901) keys = 1;
+                    if (age == 1100 || age == 1101 || age == 1400 || age == 1401) keys = 2;
+                }
                 if (scene == 10)
                 {
                     if (age >= 180 && age < 196) keys = 128; /* DOWN onto real map trigger */
@@ -120,6 +166,8 @@ int main(int argc, char **argv)
             }
             if (frame == 1800 || frame == 2300 || frame == frameCount - 1
                 || (scene == 31 && frame >= 600 && frame % 60 == 0)
+                || (scene >= 32 && readyFrame && frame - readyFrame >= 300
+                    && (frame - readyFrame) % 60 == 30)
                 || (scene == 10 && frame >= 300 && frame % 60 == 0)
                 || (scene == 10 && frame >= 1400 && frame <= 2600 && frame % 15 == 0)
                 || (scene >= 11 && scene <= 17 && readyFrame && frame - readyFrame >= 360

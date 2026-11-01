@@ -71,7 +71,11 @@ static const u16 sCryMeterNeedle_Pal[] = INCGFX_U16("graphics/pokedex/cry_meter_
 static const u8 sCryMeterNeedle_Gfx[] = INCGFX_U8("graphics/pokedex/cry_meter_needle.png", ".4bpp");
 
 static const u16 sCryMeter_Tilemap[] = INCBIN_U16("graphics/pokedex/cry_meter_map.bin"); // Unused
+#ifdef FIRERED
+static const u16 sCryMeter_Pal[] = INCGFX_U16("graphics/ui/firered/dex_meter.pal", ".gbapal");
+#else
 static const u16 sCryMeter_Pal[] = INCGFX_U16("graphics/pokedex/cry_meter.png", ".gbapal");
+#endif
 static const u8 sCryMeter_Gfx[] = INCGFX_U8("graphics/pokedex/cry_meter.png", ".4bpp.smol");
 
 static const u16 sWaveformOffsets[][72] =
@@ -159,7 +163,11 @@ static const u16 sWaveformOffsets[][72] =
     }
 };
 
+#ifdef FIRERED
+static const u16 sCryScreenBg_Pal[] = INCGFX_U16("graphics/ui/firered/dex_cry.pal", ".gbapal");
+#else
 static const u16 sCryScreenBg_Pal[] = INCGFX_U16("graphics/pokedex/cry_screen_bg.png", ".gbapal");
+#endif
 static const u8 sCryScreenBg_Gfx[] = INCGFX_U8("graphics/pokedex/cry_screen_bg.png", ".4bpp");
 
 static const u8 sWaveformTileDataNybbleMasks[] = {0xF0, 0x0F};

@@ -1782,7 +1782,11 @@ const u32 gMoveTypes_Gfx[] = INCGFX_U32("graphics/types/move_types.4bpp", ".smol
 const u16 gMoveTypes_Pal[] = INCBIN_U16("graphics/types/move_types.gbapal");
 
 const u32 gSummaryMoveSelect_Gfx[] = INCGFX_U32("graphics/summary_screen/move_select.png", ".4bpp.smol");
+#ifdef FIRERED
+const u16 gSummaryMoveSelect_Pal[] = INCGFX_U16("graphics/ui/firered/summary_selector.pal", ".gbapal");
+#else
 const u16 gSummaryMoveSelect_Pal[] = INCGFX_U16("graphics/summary_screen/move_select.png", ".gbapal");
+#endif
 
 #ifdef FIRERED
 #if P_SUMMARY_SCREEN_IV_EV_TILESET
@@ -1836,7 +1840,11 @@ const u32 gSwapLineGfx[] = INCGFX_U32("graphics/interface/swap_line.png", ".4bpp
 const u16 gSwapLinePal[] = INCGFX_U16("graphics/interface/swap_line.png", ".gbapal");
 
 const u32 gShopMenu_Gfx[] = INCGFX_U32("graphics/shop/menu.png", ".4bpp.smol");
+#ifdef FIRERED
+const u16 gShopMenu_Pal[] = INCGFX_U16("graphics/ui/firered/shop.pal", ".gbapal");
+#else
 const u16 gShopMenu_Pal[] = INCGFX_U16("graphics/shop/menu.png", ".gbapal");
+#endif
 const u32 gShopMenu_Tilemap[] = INCGFX_U32("graphics/shop/menu.bin", ".smolTM");
 const u32 gShopMenuMoney_Gfx[] = INCGFX_U32("graphics/shop/money.png", ".4bpp.smol");
 
@@ -1914,9 +1922,15 @@ const u16 gFrontierPassMedalsSilver_Pal[] = INCGFX_U16("graphics/frontier_pass/s
 const u16 gFrontierPassMedalsGold_Pal[] = INCGFX_U16("graphics/frontier_pass/gold.pal", ".gbapal");
 
 // Pokédex
+#ifdef FIRERED
+const u16 gPokedexBgHoenn_Pal[] = INCGFX_U16("graphics/ui/firered/dex_hoenn.pal", ".gbapal");
+const u16 gPokedexSearchResults_Pal[] = INCGFX_U16("graphics/ui/firered/dex_results.pal", ".gbapal");
+const u16 gPokedexBgNational_Pal[] = INCGFX_U16("graphics/ui/firered/dex_national.pal", ".gbapal");
+#else
 const u16 gPokedexBgHoenn_Pal[] = INCGFX_U16("graphics/pokedex/bg_hoenn.pal", ".gbapal");
 const u16 gPokedexSearchResults_Pal[] = INCGFX_U16("graphics/pokedex/search_results_bg.pal", ".gbapal");
 const u16 gPokedexBgNational_Pal[] = INCGFX_U16("graphics/pokedex/bg_national.pal", ".gbapal");
+#endif
 const u32 gPokedexMenu_Gfx[] = INCGFX_U32("graphics/pokedex/menu.png", ".4bpp.smol");
 const u32 gPokedexInterface_Gfx[] = INCGFX_U32("graphics/pokedex/interface.png", ".4bpp.smol");
 const u32 gUnused_PokedexNoBall[] = INCGFX_U32("graphics/pokedex/noball_unused.png", ".4bpp.smol");
@@ -1929,7 +1943,11 @@ const u32 gPokedexScreenSelectBarMain_Tilemap[] = INCGFX_U32("graphics/pokedex/s
 const u32 gPokedexScreenSelectBarSubmenu_Tilemap[] = INCGFX_U32("graphics/pokedex/screen_select_bar_submenu.bin", ".smolTM");
 const u32 gPokedexInfoScreen_Tilemap[] = INCGFX_U32("graphics/pokedex/info_screen.bin", ".smolTM");
 const u32 gPokedexCryScreen_Tilemap[] = INCGFX_U32("graphics/pokedex/cry_screen.bin", ".smolTM");
+#ifdef FIRERED
+const u16 gPokedexSearchMenu_Pal[] = INCGFX_U16("graphics/ui/firered/dex_search.pal", ".gbapal");
+#else
 const u16 gPokedexSearchMenu_Pal[] = INCGFX_U16("graphics/pokedex/search_menu.pal", ".gbapal");
+#endif
 const u32 gPokedexSearchMenu_Gfx[] = INCGFX_U32("graphics/pokedex/search_menu.png", ".4bpp.smol");
 const u32 gPokedexSearchMenuNational_Tilemap[] = INCGFX_U32("graphics/pokedex/search_menu_national.bin", ".smolTM");
 const u32 gPokedexSearchMenuHoenn_Tilemap[] = INCGFX_U32("graphics/pokedex/search_menu_hoenn.bin", ".smolTM");
@@ -2060,7 +2078,11 @@ const u32 gHoennTrainerCardFront_Tilemap[] = INCGFX_U32("graphics/trainer_card/f
 const u32 gHoennTrainerCardBack_Tilemap[] = INCGFX_U32("graphics/trainer_card/back.bin", ".smolTM");
 const u32 gHoennTrainerCardFrontLink_Tilemap[] = INCGFX_U32("graphics/trainer_card/front_link.bin", ".smolTM");
 
+#ifdef FIRERED
+const u16 gKantoTrainerCardBlue_Pal[] = INCGFX_U16("graphics/ui/firered/trainer_blue.pal", ".gbapal");
+#else
 const u16 gKantoTrainerCardBlue_Pal[] = INCGFX_U16("graphics/trainer_card/frlg/blue.pal", ".gbapal");
+#endif
 const u32 gKantoTrainerCard_Gfx[] = INCGFX_U32("graphics/trainer_card/frlg/tiles.png", ".4bpp.smol");
 const u32 gKantoTrainerCardBg_Tilemap[] = INCGFX_U32("graphics/trainer_card/frlg/bg.bin", ".smolTM");
 const u32 gKantoTrainerCardFront_Tilemap[] = INCGFX_U32("graphics/trainer_card/frlg/front.bin", ".smolTM");
@@ -2082,12 +2104,21 @@ const u32 gStorageSystemPartyMenu_Tilemap[] = INCGFX_U32("graphics/pokemon_stora
 
 const u16 gNamingScreenMenu_Pal[6][16] =
 {
+#ifdef FIRERED
+    INCGFX_U16("graphics/ui/firered/naming_menu.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_page_upper.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_page_lower.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_page_others.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_buttons.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_cursor.pal", ".gbapal"),
+#else
     INCGFX_U16("graphics/naming_screen/menu.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/page_swap_upper.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/page_swap_lower.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/page_swap_others.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/buttons.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/cursor.pal", ".gbapal"),
+#endif
 };
 const u32 gNamingScreenMenu_Gfx[]                = INCGFX_U32("graphics/naming_screen/menu.png", ".4bpp.smol");
 const u32 gNamingScreenPageSwapFrame_Gfx[]       = INCGFX_U32("graphics/naming_screen/page_swap_frame.png", ".4bpp");
