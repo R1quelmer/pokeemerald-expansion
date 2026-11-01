@@ -35,6 +35,9 @@ no status. The native font-fitting logic still applies. Exceptionally wide names
 that cannot fit even the narrowest font get a visible ellipsis with gender
 preserved, avoiding overlap with Lv100. The nickname data and other menus retain
 the full name. Safari's non-Pokémon player box does not create a badge group.
+The HP-text erase rectangle starts after the inset status label, so healing and
+damage animations cannot clear its final glyph. Four-digit HP text still fits
+inside the remaining 48px region.
 
 One controller per healthbox checks the three effective types each frame. This
 bounded check avoids missing changes from less common abilities, forms or moves.
@@ -74,6 +77,8 @@ It freezes at the next action menu after one turn. The fresh QA save grants all
 eight badges so level-50/100 fixtures obey rather than napping. Dynamic fixtures give the
 opponent a sleep status to avoid interference. Tera fixtures provision a charged
 Orb only under `FIRERED && VISUAL_QA`; production charge rules are unchanged.
+The Roost fixture also has poison, exercising the status label through healing,
+temporary type removal, restoration, and end-of-turn HP loss.
 
 The capture log records displayed type slots, actual species and active gimmick
 for each battler. `tools/visual_qa/check_type_badges.py` checks mono/dual order,

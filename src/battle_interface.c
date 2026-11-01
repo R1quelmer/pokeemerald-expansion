@@ -918,6 +918,11 @@ static void UpdateLvlInHealthbox(u8 healthboxSpriteId, u8 lvl)
 #define HP_FONT FONT_SMALL
 #define HP_MAX_DIGITS 4
 #define HP_RIGHT_SPRITE_CHARS 6
+#ifdef FIRERED
+#define HP_TEXT_CLEAR_X 48 // Keep the inset status label intact during HP animation.
+#else
+#define HP_TEXT_CLEAR_X 40
+#endif
 
 static void PrintHpOnHealthbox(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor, s8 xOffset, s8 yOffset)
 {
@@ -940,7 +945,7 @@ static void PrintHpOnHealthbox(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor,
     gSprites[spriteId2].data[1] = SPRITE_NONE;
 
     //  Clear out old text first
-    FillSpriteRectColor(spriteId, xOffset + 40, yOffset + 8, 56, 8, bgColor);
+    FillSpriteRectColor(spriteId, xOffset + HP_TEXT_CLEAR_X, yOffset + 8, 96 - HP_TEXT_CLEAR_X, 8, bgColor);
 
     width = GetStringWidth(HP_FONT, text, -1) + GetFontAttribute(HP_FONT, FONTATTR_LETTER_SPACING);
     if (width < 32)
@@ -977,7 +982,7 @@ static void PrintHPPercentageOnHealthbox(u32 spriteId, s16 currHp, s16 maxHp, u3
     gSprites[spriteId2].data[1] = SPRITE_NONE;
 
     //  Clear out old text first
-    FillSpriteRectColor(spriteId, xOffset + 40, yOffset + 8, 56, 8, bgColor);
+    FillSpriteRectColor(spriteId, xOffset + HP_TEXT_CLEAR_X, yOffset + 8, 96 - HP_TEXT_CLEAR_X, 8, bgColor);
 
     width = GetStringWidth(HP_FONT, text, -1) + GetFontAttribute(HP_FONT, FONTATTR_LETTER_SPACING);
     if (width < 32)

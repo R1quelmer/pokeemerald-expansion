@@ -2,9 +2,11 @@
 from PIL import Image
 import struct
 from firered_ui_theme import NAVY, PANEL, RAISED, BORDER, BLUE, CYAN, TEXT, SUBTEXT, WARNING, AMBER
+from generate_firered_type_badges import generate as generate_type_badges
 
 
 def generate(root, out, write_palette):
+    generate_type_badges(root, out)
     def read(path):
         return [tuple(map(int, line.split())) for line in (root / path).read_text().splitlines()[3:]]
 

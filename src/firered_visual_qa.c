@@ -155,7 +155,9 @@ static void StartTypeBadgeBattle(u8 scene)
     if (scene == 61)
     {
         u16 hp = GetMonData(mon, MON_DATA_MAX_HP) / 2;
+        u32 status = STATUS1_POISON;
         SetMonData(mon, MON_DATA_HP, &hp);
+        SetMonData(mon, MON_DATA_STATUS, &status);
     }
     if (scene == 58 || scene == 59)
         AddBagItem(ITEM_TERA_ORB, 1);
