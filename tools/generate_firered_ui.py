@@ -125,7 +125,11 @@ def summary_panels():
             d.rectangle((84,y,238,y+15),fill=7)
         for y in range(20):
             for x in range(30):
-                if not name.startswith('info') and (x<10 or y<2):continue
+                # The native move pages also contain an EFFECT bitmap in
+                # the left footer. Clear those legacy heading rows while
+                # retaining the portrait and other controller-owned tiles.
+                replace_move_heading = 'moves' in name and x < 10 and y in (13, 14)
+                if not name.startswith('info') and (y<2 or (x<10 and not replace_move_heading)):continue
                 tile=canvas.crop((x*8,y*8,x*8+8,y*8+8));key=tile.tobytes()
                 if key not in ids:ids[key]=240+len(extra);extra.append(tile)
                 tm[y*32+x]=ids[key]|bank<<12
