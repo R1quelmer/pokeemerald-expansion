@@ -9,6 +9,7 @@
 #include "item_menu.h"
 #include "item.h"
 #include "shop.h"
+#include "money.h"
 #include "pokedex.h"
 #include "option_menu.h"
 #include "trainer_card.h"
@@ -131,7 +132,7 @@ bool8 TryInitFireRedVisualQA(void)
         SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_IS_EGG, &isEgg);
         SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_NICKNAME, COMPOUND_STRING("EGG"));
     }
-    if (scene == 29)
+    if (scene == 29 || scene == 42)
     {
         u16 item = ITEM_CHARIZARDITE_X;
         u32 status = STATUS1_POISON;
@@ -175,6 +176,16 @@ bool8 TryInitFireRedVisualQA(void)
         for (u32 i = 0; i < IN_BOX_COUNT; i++)
             SetBoxMonAt(0, i, &gParties[B_TRAINER_PLAYER][i % PARTY_SIZE].box);
     }
+    if (scene == 43)
+    {
+        StringCopy(gSaveBlock2Ptr->playerName, COMPOUND_STRING("WWWWWWW"));
+        gSaveBlock2Ptr->playerGender = FEMALE;
+        gSaveBlock2Ptr->playTimeHours = 999;
+        gSaveBlock2Ptr->playTimeMinutes = 59;
+        SetMoney(&gSaveBlock1Ptr->money, MAX_MONEY);
+        for (u32 flag = FLAG_BADGE01_GET; flag <= FLAG_BADGE08_GET; flag++)
+            FlagSet(flag);
+    }
     gVisualQaProgress = 14;
     gMain.savedCallback = ReturnFromVisualQA;
     // The title screen's tasks must not run inside a directly opened menu.
@@ -216,12 +227,15 @@ bool8 TryInitFireRedVisualQA(void)
         SetMainCallback2(CB2_LoadMap);
         break;
     case 5: case 39: case 40: SetMainCallback2(CB2_OpenPokedex); break;
-    case 6: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
+    case 6: case 43: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
     case 7: DoNamingScreen(NAMING_SCREEN_PLAYER, gSaveBlock2Ptr->playerName, 0, 0, 0, ReturnFromVisualQA); break;
     case 38:
         StringCopy(sVisualQaNickname, COMPOUND_STRING("WWWWWWWWWW"));
         DoNamingScreen(NAMING_SCREEN_NICKNAME, sVisualQaNickname,
             SPECIES_TREECKO, MON_MALE, 0, ReturnFromVisualQA); break;
+    case 44:
+        StringCopy(sVisualQaNickname, COMPOUND_STRING("WWWWWWWW"));
+        DoNamingScreen(NAMING_SCREEN_BOX, sVisualQaNickname, 0, 0, 0, ReturnFromVisualQA); break;
     case 34: FireRedVisualQA_OpenStorage(); break;
     case 42: FireRedVisualQA_OpenStorageItems(); break;
     case 8:

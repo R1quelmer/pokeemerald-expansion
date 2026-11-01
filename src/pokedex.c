@@ -613,9 +613,16 @@ static const struct CompressedSpriteSheet sInterfaceSpriteSheet[] =
     {0}
 };
 
+#ifdef FIRERED
+static const u16 sFireRedDexInterface_Pal[] = INCGFX_U16("graphics/ui/firered/dex_interface.pal", ".gbapal");
+#endif
 static const struct SpritePalette sInterfaceSpritePalette[] =
 {
+#ifdef FIRERED
+    {sFireRedDexInterface_Pal, TAG_DEX_INTERFACE},
+#else
     {gPokedexBgHoenn_Pal, TAG_DEX_INTERFACE},
+#endif
     {0}
 };
 

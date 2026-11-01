@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 42; ++scene)
+    for (unsigned scene = 0; scene <= 44; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -90,6 +90,11 @@ int main(int argc, char **argv)
                     if (age == 420 || age == 421) keys = 4;
                     if (age == 720 || age == 721 || age == 900 || age == 901) keys = 1;
                     if (age == 1100 || age == 1101 || age == 1400 || age == 1401) keys = 2;
+                }
+                if (scene == 41)
+                {
+                    if (age == 420 || age == 421 || age == 720 || age == 721
+                        || age == 1260 || age == 1261) keys = 1;
                 }
                 if (scene == 10)
                 {
@@ -165,6 +170,7 @@ int main(int argc, char **argv)
                 fclose(dump);
             }
             if (frame == 1800 || frame == 2300 || frame == frameCount - 1
+                || (scene == 30 && readyFrame && frame - readyFrame == 100)
                 || (scene == 31 && frame >= 600 && frame % 60 == 0)
                 || (scene >= 32 && readyFrame && frame - readyFrame >= 300
                     && (frame - readyFrame) % 60 == 30)

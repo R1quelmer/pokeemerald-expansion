@@ -67,3 +67,24 @@ exercise levels 1/9/10/99/100, wide names, faint/status/items, long ability/move
 names, full storage, full/empty bag, shop confirmation, nickname navigation,
 Dex subpages and a normal battle. These additions await their next emulator
 pass; successful compilation alone does not approve their appearance.
+
+## Second emulator pass (92fcb37)
+
+Run 41263118356 captured all 43 scenes successfully. Info headers and ability
+names are readable, Party edge cases fit and populated/empty bag lists render.
+Inspection found two more ownership conflicts: the stats windows extended a
+blank sixth tile row over EXPERIENCE, and move-selection cleanup cleared the
+EFFECT header with the portrait window. Stats windows now stop before the
+header; move detail headers are restored after cleanup and hidden when their
+panel closes. The legacy bitmap EFFECT heading is removed from the FireRed
+sliding map. Long list move names use ellipses, with the complete selected
+move name printed in the 160px section header.
+
+Dex interface labels now have an independent OBJ palette so its old white BG
+slot can become navy. Search field slot 3, Naming paper slot 1 and Trainer Card
+paper stripe slot 14 become panel colors. Trainer bitmap BADGES ink is moved
+to its own text slot before recoloring, preserving the native atlas/tile IDs.
+Scenes 43/44 additionally check a maximum-length trainer name, 999:59 time,
+maximum money, all badges, the female card and a full box name. Scene 41 now
+advances through wild-battle text into commands and the move list. The next
+emulator pass must approve these corrections before final delivery.

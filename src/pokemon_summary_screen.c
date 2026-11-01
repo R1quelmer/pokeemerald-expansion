@@ -189,6 +189,7 @@ static EWRAM_DATA struct PokemonSummaryScreenData
     u8 windowIds[8];
 #ifdef FIRERED
     u8 headerWindows[4];
+    enum Move shownMove;
 #endif
     u8 spriteIds[SPRITE_ARR_ID_COUNT];
     s16 switchCounter; // Used for various switch statement cases that decompress/load graphics or Pokémon data
@@ -540,7 +541,7 @@ static const struct WindowTemplate sSummaryTemplate[] =
         .tilemapLeft = 10,
         .tilemapTop = SUMMARY_UI(8, 7),
         .width = 6,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 209,
     },
@@ -549,7 +550,7 @@ static const struct WindowTemplate sSummaryTemplate[] =
         .tilemapLeft = 22,
         .tilemapTop = SUMMARY_UI(8, 7),
         .width = 5,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 245,
     },
@@ -691,7 +692,7 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
         .tilemapLeft = 16,
         .tilemapTop = SUMMARY_UI(8, 7),
         .width = 6,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 507,
     },
@@ -700,7 +701,7 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
         .tilemapLeft = 27,
         .tilemapTop = SUMMARY_UI(8, 7),
         .width = 3,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 543,
     },
@@ -2446,6 +2447,9 @@ static void ChangeSelectedMove(s16 *taskData, s8 direction, u8 *moveIndexPtr)
         PositionAppealJamSlidingWindow(0, 3, 0);
     }
 
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(sMonSummaryScreen->currPageIndex);
+#endif
     *moveIndexPtr = newMoveIndex;
     // Get rid of the 'flicker' effect(while idle) when scrolling.
     if (moveIndexPtr == &sMonSummaryScreen->firstMoveIndex)
@@ -3203,6 +3207,16 @@ static void DrawFireRedSummaryHeaders(u8 page)
     for (u32 i = 0; i < count; i++)
     {
         u8 window = sMonSummaryScreen->headerWindows[i];
+        if (IS_MOVE_PAGE(page) && i == 1 && sMonSummaryScreen->shownMove == MOVE_NONE)
+        {
+            if (window != WINDOW_NONE)
+            {
+                ClearWindowTilemap(window);
+                RemoveWindow(window);
+                sMonSummaryScreen->headerWindows[i] = WINDOW_NONE;
+            }
+            continue;
+        }
         if (window == WINDOW_NONE)
         {
             struct WindowTemplate template = {
@@ -3215,6 +3229,8 @@ static void DrawFireRedSummaryHeaders(u8 page)
         }
         FillWindowPixelBuffer(window, PIXEL_FILL(0));
         const u8 *label = headers[i].label;
+        if (IS_MOVE_PAGE(page) && i == 0 && sMonSummaryScreen->shownMove != MOVE_NONE)
+            label = GetMoveName(sMonSummaryScreen->shownMove);
         if (page == PSS_PAGE_INFO && i == 1 && sMonSummaryScreen->summary.isEgg)
             label = COMPOUND_STRING("HATCH STATUS");
         AddTextPrinterParameterized3(window, FONT_SMALL, 2, 1, colors, TEXT_SKIP_DRAW, label);
@@ -3239,6 +3255,7 @@ static void ResetWindows(void)
     InitWindows(sSummaryTemplate);
 #ifdef FIRERED
     memset(sMonSummaryScreen->headerWindows, WINDOW_NONE, sizeof(sMonSummaryScreen->headerWindows));
+    sMonSummaryScreen->shownMove = MOVE_NONE;
 #endif
     DeactivateAllTextPrinters();
     for (i = 0; i < PSS_LABEL_WINDOW_END; i++)
@@ -3290,6 +3307,28 @@ static void PrintTextOnWindowToFitPx(u8 windowId, const u8 *string, u8 x, u8 y, 
 
 static void PrintTextOnWindowToFit(u8 windowId, const u8 *string, u8 x, u8 y, u8 lineSpacing, u8 colorId)
 {
+#ifdef FIRERED
+    if (IS_MOVE_PAGE(sMonSummaryScreen->currPageIndex)
+        && windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_MOVE_NAMES])
+    {
+        u8 display[96];
+        u32 length = 0, width = WindowWidthPx(windowId) - x;
+        u32 font = GetStringWidth(FONT_NORMAL, string, 0) <= width ? FONT_NORMAL : FONT_SMALL;
+        while (string[length] != EOS && length < ARRAY_COUNT(display) - 2)
+        {
+            display[length] = string[length];
+            length++;
+        }
+        display[length] = EOS;
+        while (length && GetStringWidth(font, display, 0) > width)
+        {
+            display[--length] = CHAR_ELLIPSIS;
+            display[length + 1] = EOS;
+        }
+        PrintTextOnWindowWithFont(windowId, display, x, y, lineSpacing, colorId, font);
+        return;
+    }
+#endif
     PrintTextOnWindowToFitPx(windowId, string, x, y, lineSpacing, colorId, WindowWidthPx(windowId));
 }
 
@@ -4328,6 +4367,9 @@ static void PrintContestMoveDescription(u8 moveSlot)
 
 static void PrintMoveDetails(enum Move move)
 {
+#ifdef FIRERED
+    sMonSummaryScreen->shownMove = move;
+#endif
     u8 windowId = AddWindowFromTemplateList(sPageMovesTemplate, PSS_DATA_WINDOW_MOVE_DESCRIPTION);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
     if (move != MOVE_NONE)
@@ -4350,6 +4392,9 @@ static void PrintMoveDetails(enum Move move)
         ClearWindowTilemap(windowId);
     }
 
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(sMonSummaryScreen->currPageIndex);
+#endif
     ScheduleBgCopyTilemapToVram(0);
 }
 
