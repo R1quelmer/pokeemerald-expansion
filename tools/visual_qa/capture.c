@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 46; ++scene)
+    for (unsigned scene = 0; scene <= 50; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -103,6 +103,14 @@ int main(int argc, char **argv)
                     if (age == 420 || age == 421 || age == 720 || age == 721
                         || age == 1260 || age == 1261) keys = 1;
                 }
+                if (scene == 49)
+                {
+                    if (age == 420 || age == 421) keys = 64;
+                    if (age == 600 || age == 601 || age == 780 || age == 781) keys = 1;
+                    if (age == 1200 || age == 1201) keys = 2;
+                }
+                if (scene == 50 && (age == 420 || age == 421 || age == 480 || age == 481
+                    || age == 540 || age == 541 || age == 600 || age == 601)) keys = 128;
                 if (scene == 10)
                 {
                     if (age >= 180 && age < 196) keys = 128; /* DOWN onto real map trigger */

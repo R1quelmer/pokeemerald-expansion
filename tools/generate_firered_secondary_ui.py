@@ -40,6 +40,13 @@ def generate(root, out, write_palette):
     for index in [57, 58, 73, 74, 89, 90, 59, 60, 75, 76]:
         assert party[index] == original_party[index], index
     write_palette(out / 'party_native.pal', party)
+    learn = png_palette('graphics/interface/ui_learn_move.png')[:16]
+    learn[0:5] = [NAVY, CYAN, BLUE, BORDER, PANEL]
+    learn[13:16] = [BORDER, NAVY, TEXT]
+    write_palette(out / 'move_relearner.pal', learn)
+    popup = read('graphics/pokemon_storage/box_selection_popup.pal')
+    popup[8:12] = [PANEL, RAISED, BLUE, BORDER]
+    write_palette(out / 'storage_popup.pal', popup)
 
     card = [NAVY, PANEL, RAISED, PANEL, BORDER, TEXT, BORDER, NAVY,
             TEXT, BORDER, BLUE, BLUE, BORDER, BORDER, PANEL, BLUE]

@@ -82,7 +82,11 @@ static EWRAM_DATA struct {
 EWRAM_DATA enum MoveRelearnerStates gMoveRelearnerState = MOVE_RELEARNER_LEVEL_UP_MOVES;
 EWRAM_DATA enum RelearnMode gRelearnMode = RELEARN_MODE_NONE;
 
+#ifdef FIRERED
+static const u16 sUI_Pal[] = INCGFX_U16("graphics/ui/firered/move_relearner.pal", ".gbapal");
+#else
 static const u16 sUI_Pal[] = INCGFX_U16("graphics/interface/ui_learn_move.png", ".gbapal");
+#endif
 
 // The arrow sprites in this spritesheet aren't used. The scroll-arrow system provides its own
 // arrow sprites.

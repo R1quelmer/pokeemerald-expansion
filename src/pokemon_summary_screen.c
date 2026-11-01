@@ -4421,7 +4421,17 @@ static void PrintNewMoveDetailsOrCancelText(void)
         DynamicPlaceholderTextUtil_SetPlaceholderPtr(0, gStringVar1);
         DynamicPlaceholderTextUtil_SetPlaceholderPtr(1, gStringVar1);
         DynamicPlaceholderTextUtil_ExpandPlaceholders(gStringVar4, sMovesPPLayout);
+#ifdef FIRERED
+        ConvertIntToDecimalStringN(gStringVar1, GetMovePP(move), STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringCopy(gStringVar4, COMPOUND_STRING("PP "));
+        StringAppend(gStringVar4, gStringVar1);
+        StringAppend(gStringVar4, gText_Slash);
+        StringAppend(gStringVar4, gStringVar1);
+        PrintTextOnWindowWithFont(windowId2, gStringVar4,
+            max(0, GetStringRightAlignXOffset(FONT_SMALL, gStringVar4, 46)), 65, 0, 12, FONT_SMALL);
+#else
         PrintTextOnWindow(windowId2, gStringVar4, GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 44), 65, 0, 12);
+#endif
     }
 }
 

@@ -10,6 +10,7 @@
 #include "item.h"
 #include "shop.h"
 #include "money.h"
+#include "move_relearner.h"
 #include "pokedex.h"
 #include "option_menu.h"
 #include "trainer_card.h"
@@ -242,6 +243,13 @@ bool8 TryInitFireRedVisualQA(void)
     case 5: case 39: case 40: SetMainCallback2(CB2_OpenPokedex); break;
     case 6: case 43: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
     case 7: DoNamingScreen(NAMING_SCREEN_PLAYER, gSaveBlock2Ptr->playerName, 0, 0, 0, ReturnFromVisualQA); break;
+    case 47:
+        gSpecialVar_0x8004 = 0;
+        SetMainCallback2(CB2_InitLearnMove); break;
+    case 48:
+        ShowSelectMovePokemonSummaryScreen(gParties[B_TRAINER_PLAYER], 0, ReturnFromVisualQA, MOVE_NONE); break;
+    case 50:
+        ShowSelectMovePokemonSummaryScreen(gParties[B_TRAINER_PLAYER], 0, ReturnFromVisualQA, MOVE_WILL_O_WISP); break;
     case 38:
         StringCopy(sVisualQaNickname, COMPOUND_STRING("WWWWWWWWWWWW"));
         DoNamingScreen(NAMING_SCREEN_NICKNAME, sVisualQaNickname,
@@ -251,7 +259,7 @@ bool8 TryInitFireRedVisualQA(void)
         DoNamingScreen(NAMING_SCREEN_BOX, sVisualQaNickname, 0, 0, 0, ReturnFromVisualQA); break;
     case 34: FireRedVisualQA_OpenStorage(); break;
     case 42: FireRedVisualQA_OpenStorageItems(); break;
-    case 8:
+    case 8: case 49:
         for (u32 i = 0; i < PARTY_SIZE; i++)
             SetBoxMonAt(0, i, &gParties[B_TRAINER_PLAYER][i].box);
         FireRedVisualQA_OpenStorage(); break;
