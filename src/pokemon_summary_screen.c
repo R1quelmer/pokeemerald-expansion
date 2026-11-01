@@ -44,6 +44,9 @@
 #include "text.h"
 #include "tv.h"
 #include "window.h"
+#ifdef FIRERED
+#include "firered_ui.h"
+#endif
 #include "constants/battle_move_effects.h"
 #include "constants/items.h"
 #include "constants/moves.h"
@@ -184,6 +187,10 @@ static EWRAM_DATA struct PokemonSummaryScreenData
     u8 bgDisplayOrder; // Determines the order page backgrounds are loaded while scrolling between them
     bool8 hasRelearnableMoves;
     u8 windowIds[8];
+#ifdef FIRERED
+    u8 headerWindows[4];
+    enum Move shownMove;
+#endif
     u8 spriteIds[SPRITE_ARR_ID_COUNT];
     s16 switchCounter; // Used for various switch statement cases that decompress/load graphics or Pokémon data
     u8 unk_filler4[6];
@@ -244,6 +251,10 @@ static void DrawExperienceProgressBar(struct Pokemon *);
 static void DrawContestMoveHearts(enum Move move);
 static void LimitEggSummaryPageDisplay(void);
 static void ResetWindows(void);
+#ifdef FIRERED
+static void DrawFireRedSummaryHeaders(u8 page);
+static void ClearFireRedSummaryHeaders(void);
+#endif
 static void PrintMonInfo(void);
 static void PrintNotEggInfo(void);
 static void PrintEggInfo(void);
@@ -339,6 +350,11 @@ static void UpdateRelearnPrompt(void);
 static struct BoxPokemon *GetCurrentBoxmon(void);
 
 #define IS_MOVE_PAGE(page) (page == PSS_PAGE_BATTLE_MOVES || page == PSS_PAGE_CONTEST_MOVES)
+#ifdef FIRERED
+#define SUMMARY_UI(fireRed, original) (fireRed)
+#else
+#define SUMMARY_UI(fireRed, original) (original)
+#endif
 
 static const struct BgTemplate sBgTemplates[] =
 {
@@ -523,25 +539,25 @@ static const struct WindowTemplate sSummaryTemplate[] =
     [PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT] = {
         .bg = 0,
         .tilemapLeft = 10,
-        .tilemapTop = 7,
+        .tilemapTop = SUMMARY_UI(8, 7),
         .width = 6,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 209,
     },
     [PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT] = {
         .bg = 0,
         .tilemapLeft = 22,
-        .tilemapTop = 7,
+        .tilemapTop = SUMMARY_UI(8, 7),
         .width = 5,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 245,
     },
     [PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP] = {
         .bg = 0,
         .tilemapLeft = 10,
-        .tilemapTop = 14,
+        .tilemapTop = SUMMARY_UI(15, 14),
         .width = 11,
         .height = 4,
         .paletteNum = 6,
@@ -559,7 +575,7 @@ static const struct WindowTemplate sSummaryTemplate[] =
     [PSS_LABEL_WINDOW_MOVES_POWER_ACC] = {
         .bg = 0,
         .tilemapLeft = 1,
-        .tilemapTop = 15,
+        .tilemapTop = SUMMARY_UI(16, 15),
         .width = 9,
         .height = 4,
         .paletteNum = 6,
@@ -568,7 +584,7 @@ static const struct WindowTemplate sSummaryTemplate[] =
     [PSS_LABEL_WINDOW_MOVES_APPEAL_JAM] = {
         .bg = 0,
         .tilemapLeft = 1,
-        .tilemapTop = 15,
+        .tilemapTop = SUMMARY_UI(16, 15),
         .width = 5,
         .height = 4,
         .paletteNum = 6,
@@ -635,18 +651,18 @@ static const struct WindowTemplate sPageInfoTemplate[] =
     [PSS_DATA_WINDOW_INFO_ABILITY] = {
         .bg = 0,
         .tilemapLeft = 11,
-        .tilemapTop = 9,
+        .tilemapTop = SUMMARY_UI(10, 9),
         .width = 18,
-        .height = 4,
+        .height = SUMMARY_UI(3, 4),
         .paletteNum = 6,
         .baseBlock = 503,
     },
     [PSS_DATA_WINDOW_INFO_MEMO] = {
         .bg = 0,
         .tilemapLeft = 11,
-        .tilemapTop = 14,
+        .tilemapTop = SUMMARY_UI(15, 14),
         .width = 18,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 575,
     },
@@ -674,25 +690,25 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
     [PSS_DATA_WINDOW_SKILLS_STATS_LEFT] = {
         .bg = 0,
         .tilemapLeft = 16,
-        .tilemapTop = 7,
+        .tilemapTop = SUMMARY_UI(8, 7),
         .width = 6,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 507,
     },
     [PSS_DATA_WINDOW_SKILLS_STATS_RIGHT] = {
         .bg = 0,
         .tilemapLeft = 27,
-        .tilemapTop = 7,
+        .tilemapTop = SUMMARY_UI(8, 7),
         .width = 3,
-        .height = 6,
+        .height = SUMMARY_UI(5, 6),
         .paletteNum = 6,
         .baseBlock = 543,
     },
     [PSS_DATA_WINDOW_EXP] = {
         .bg = 0,
         .tilemapLeft = 24,
-        .tilemapTop = 14,
+        .tilemapTop = SUMMARY_UI(15, 14),
         .width = 6,
         .height = 4,
         .paletteNum = 6,
@@ -722,7 +738,7 @@ static const struct WindowTemplate sPageMovesTemplate[] = // This is used for bo
     [PSS_DATA_WINDOW_MOVE_DESCRIPTION] = {
         .bg = 0,
         .tilemapLeft = 10,
-        .tilemapTop = 15,
+        .tilemapTop = SUMMARY_UI(16, 15),
         .width = 20,
         .height = 4,
         .paletteNum = 6,
@@ -1168,7 +1184,7 @@ static const u16 sMarkings_Pal[] = INCGFX_U16("graphics/summary_screen/markings.
 static u8 ShowCategoryIcon(enum DamageCategory category)
 {
     if (sMonSummaryScreen->categoryIconSpriteId == 0xFF)
-        sMonSummaryScreen->categoryIconSpriteId = CreateSprite(&gSpriteTemplate_CategoryIcons, 48, 128, 0);
+        sMonSummaryScreen->categoryIconSpriteId = CreateSprite(&gSpriteTemplate_CategoryIcons, 48, SUMMARY_UI(136, 128), 0);
 
     gSprites[sMonSummaryScreen->categoryIconSpriteId].invisible = FALSE;
     StartSpriteAnim(&gSprites[sMonSummaryScreen->categoryIconSpriteId], category);
@@ -1464,7 +1480,14 @@ static bool8 DecompressGraphics(void)
         break;
     case 6:
         LoadPalette(gSummaryScreen_Pal, BG_PLTT_ID(0), 8 * PLTT_SIZE_4BPP);
+#ifdef FIRERED
+        {
+            static const u16 ppPalette[] = INCGFX_U16("graphics/ui/firered/summary_pp.pal", ".gbapal");
+            LoadPalette(ppPalette, BG_PLTT_ID(8), sizeof(ppPalette));
+        }
+#else
         LoadPalette(&gPPTextPalette, BG_PLTT_ID(8) + 1, PLTT_SIZEOF(16 - 1));
+#endif
         sMonSummaryScreen->switchCounter++;
         break;
     case 7:
@@ -2424,6 +2447,9 @@ static void ChangeSelectedMove(s16 *taskData, s8 direction, u8 *moveIndexPtr)
         PositionAppealJamSlidingWindow(0, 3, 0);
     }
 
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(sMonSummaryScreen->currPageIndex);
+#endif
     *moveIndexPtr = newMoveIndex;
     // Get rid of the 'flicker' effect(while idle) when scrolling.
     if (moveIndexPtr == &sMonSummaryScreen->firstMoveIndex)
@@ -3138,11 +3164,99 @@ static void LimitEggSummaryPageDisplay(void) // If the Pokémon is an egg, limit
         ChangeBgX(3, 0, BG_COORD_SET);
 }
 
+#ifdef FIRERED
+// Two tile rows accommodate the native 12px glyphs without clipping.
+// 160 reserved tiles at 0x350..0x3ef follow the relearn prompt (800..821).
+static void ClearFireRedSummaryHeaders(void)
+{
+    for (u32 i = 0; i < ARRAY_COUNT(sMonSummaryScreen->headerWindows); i++)
+    {
+        u8 window = sMonSummaryScreen->headerWindows[i];
+        if (window != WINDOW_NONE)
+        {
+            ClearWindowTilemap(window);
+            RemoveWindow(window);
+            sMonSummaryScreen->headerWindows[i] = WINDOW_NONE;
+        }
+    }
+}
+
+static void DrawFireRedSummaryHeaders(u8 page)
+{
+    struct Header {u8 x, y, width; const u8 *label;};
+    const struct Header info[] = {
+        {11, 2, 18, COMPOUND_STRING("PROFILE")},
+        {11, 8, 18, COMPOUND_STRING("ABILITY")},
+        {11, 13, 18, COMPOUND_STRING("TRAINER INFO")},
+    };
+    const struct Header skills[] = {
+        {10, 2, 10, COMPOUND_STRING("ITEM")},
+        {20, 2, 10, COMPOUND_STRING("RIBBONS")},
+        {10, 6, 20, COMPOUND_STRING("STATS")},
+        {10, 13, 20, COMPOUND_STRING("EXPERIENCE")},
+    };
+    const struct Header moves[] = {
+        {10, 2, 20, COMPOUND_STRING("MOVES")},
+        {0, 14, 10, COMPOUND_STRING("EFFECT")},
+        {10, 14, 20, COMPOUND_STRING("DESCRIPTION")},
+    };
+    const struct Header *headers = page == PSS_PAGE_INFO ? info : page == PSS_PAGE_SKILLS ? skills : moves;
+    u32 count = page == PSS_PAGE_SKILLS ? 4 : 3;
+    static const u8 colors[] = {0, 3, 0};
+    static const u8 valueColors[] = {0, 3, 0};
+    for (u32 i = 0; i < count; i++)
+    {
+        u8 window = sMonSummaryScreen->headerWindows[i];
+        if (IS_MOVE_PAGE(page) && i == 1 && sMonSummaryScreen->shownMove == MOVE_NONE)
+        {
+            if (window != WINDOW_NONE)
+            {
+                ClearWindowTilemap(window);
+                RemoveWindow(window);
+                sMonSummaryScreen->headerWindows[i] = WINDOW_NONE;
+            }
+            continue;
+        }
+        if (window == WINDOW_NONE)
+        {
+            struct WindowTemplate template = {
+                .bg = 0, .tilemapLeft = headers[i].x, .tilemapTop = headers[i].y,
+                .width = headers[i].width, .height = 2, .paletteNum = 6,
+                .baseBlock = 0x350 + i * 40,
+            };
+            window = AddWindow(&template);
+            sMonSummaryScreen->headerWindows[i] = window;
+        }
+        FillWindowPixelBuffer(window, PIXEL_FILL(0));
+        const u8 *label = headers[i].label;
+        if (IS_MOVE_PAGE(page) && i == 0 && sMonSummaryScreen->shownMove != MOVE_NONE)
+            label = GetMoveName(sMonSummaryScreen->shownMove);
+        if (page == PSS_PAGE_INFO && i == 1 && sMonSummaryScreen->summary.isEgg)
+            label = COMPOUND_STRING("HATCH STATUS");
+        AddTextPrinterParameterized3(window, FONT_SMALL, 2, 1, colors, TEXT_SKIP_DRAW, label);
+        if (page == PSS_PAGE_INFO && i == 1 && !sMonSummaryScreen->summary.isEgg)
+        {
+            enum Ability ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
+            const u8 *name = gAbilitiesInfo[ability].name;
+            u8 font = GetFontIdToFit(name, FONT_SMALL, 0, 100);
+            u32 x = GetStringRightAlignXOffset(font, name, headers[i].width * 8 - 2);
+            AddTextPrinterParameterized3(window, font, x, 1, valueColors, TEXT_SKIP_DRAW, name);
+        }
+        PutWindowTilemap(window);
+        CopyWindowToVram(window, COPYWIN_FULL);
+    }
+}
+#endif
+
 static void ResetWindows(void)
 {
     u8 i;
 
     InitWindows(sSummaryTemplate);
+#ifdef FIRERED
+    memset(sMonSummaryScreen->headerWindows, WINDOW_NONE, sizeof(sMonSummaryScreen->headerWindows));
+    sMonSummaryScreen->shownMove = MOVE_NONE;
+#endif
     DeactivateAllTextPrinters();
     for (i = 0; i < PSS_LABEL_WINDOW_END; i++)
         FillWindowPixelBuffer(i, PIXEL_FILL(0));
@@ -3152,6 +3266,31 @@ static void ResetWindows(void)
 
 static void PrintTextOnWindowWithFont(u8 windowId, const u8 *string, u8 x, u8 y, u8 lineSpacing, u8 colorId, u32 fontId)
 {
+#ifdef FIRERED
+    if ((sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO
+         && (windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_INFO_ABILITY]
+             || windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_INFO_MEMO]))
+        || (IS_MOVE_PAGE(sMonSummaryScreen->currPageIndex)
+            && windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_MOVE_DESCRIPTION]))
+    {
+        u8 insetY = sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO ? 0 : y;
+        FireRedPrintParagraph(windowId, string, max(x, 2), insetY, sTextColors[colorId]);
+        return;
+    }
+    if (windowId == PSS_LABEL_WINDOW_MOVES_POWER_ACC
+        || windowId == PSS_LABEL_WINDOW_MOVES_APPEAL_JAM
+        || windowId == PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT
+        || windowId == PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT
+        || windowId == PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP
+        || (sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS
+            && (windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_STATS_LEFT]
+                || windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_STATS_RIGHT]
+                || windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_EXP])))
+    {
+        fontId = FONT_SMALL_NARROW;
+        lineSpacing = 4;
+    }
+#endif
     AddTextPrinterParameterized4(windowId, fontId, x, y, 0, lineSpacing, sTextColors[colorId], 0, string);
 }
 
@@ -3168,6 +3307,28 @@ static void PrintTextOnWindowToFitPx(u8 windowId, const u8 *string, u8 x, u8 y, 
 
 static void PrintTextOnWindowToFit(u8 windowId, const u8 *string, u8 x, u8 y, u8 lineSpacing, u8 colorId)
 {
+#ifdef FIRERED
+    if (IS_MOVE_PAGE(sMonSummaryScreen->currPageIndex)
+        && windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_MOVE_NAMES])
+    {
+        u8 display[96];
+        u32 length = 0, width = WindowWidthPx(windowId) - x;
+        u32 font = GetStringWidth(FONT_NORMAL, string, 0) <= width ? FONT_NORMAL : FONT_SMALL;
+        while (string[length] != EOS && length < ARRAY_COUNT(display) - 2)
+        {
+            display[length] = string[length];
+            length++;
+        }
+        display[length] = EOS;
+        while (length && GetStringWidth(font, display, 0) > width)
+        {
+            display[--length] = CHAR_ELLIPSIS;
+            display[length + 1] = EOS;
+        }
+        PrintTextOnWindowWithFont(windowId, display, x, y, lineSpacing, colorId, font);
+        return;
+    }
+#endif
     PrintTextOnWindowToFitPx(windowId, string, x, y, lineSpacing, colorId, WindowWidthPx(windowId));
 }
 
@@ -3277,29 +3438,32 @@ static void PrintPageNamesAndStats(void)
 
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_INFO_RENTAL, gText_RentalPkmn, 0, 1, 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_INFO_TYPE, gText_TypeSlash, 0, 1, 0, 0);
-    statsXPos = 6 + GetStringCenterAlignXOffset(FONT_NORMAL, gText_HP4, 42);
+    statsXPos = 6 + GetStringCenterAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gText_HP4, 42);
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT, gText_HP4, statsXPos, 1, 0, 1);
-    statsXPos = 6 + GetStringCenterAlignXOffset(FONT_NORMAL, gText_Attack3, 42);
-    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT, gText_Attack3, statsXPos, 17, 0, 1);
-    statsXPos = 6 + GetStringCenterAlignXOffset(FONT_NORMAL, gText_Defense3, 42);
-    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT, gText_Defense3, statsXPos, 33, 0, 1);
-    statsXPos = 2 + GetStringCenterAlignXOffset(FONT_NORMAL, gText_SpAtk4, 36);
+    statsXPos = 6 + GetStringCenterAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gText_Attack3, 42);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT, gText_Attack3, statsXPos, SUMMARY_UI(13, 17), 0, 1);
+    statsXPos = 6 + GetStringCenterAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gText_Defense3, 42);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_LEFT, gText_Defense3, statsXPos, SUMMARY_UI(25, 33), 0, 1);
+    statsXPos = 2 + GetStringCenterAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gText_SpAtk4, 36);
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT, gText_SpAtk4, statsXPos, 1, 0, 1);
-    statsXPos = 2 + GetStringCenterAlignXOffset(FONT_NORMAL, gText_SpDef4, 36);
-    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT, gText_SpDef4, statsXPos, 17, 0, 1);
-    statsXPos = 2 + GetStringCenterAlignXOffset(FONT_NORMAL, gText_Speed2, 36);
-    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT, gText_Speed2, statsXPos, 33, 0, 1);
+    statsXPos = 2 + GetStringCenterAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gText_SpDef4, 36);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT, gText_SpDef4, statsXPos, SUMMARY_UI(13, 17), 0, 1);
+    statsXPos = 2 + GetStringCenterAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gText_Speed2, 36);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATS_RIGHT, gText_Speed2, statsXPos, SUMMARY_UI(25, 33), 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, gText_ExpPoints, 6, 1, 0, 1);
-    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, gText_NextLv, 6, 17, 0, 1);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_EXP, gText_NextLv, 6, SUMMARY_UI(13, 17), 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_POKEMON_SKILLS_STATUS, gText_Status, 2, 1, 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, gText_Power, 0, 1, 0, 1);
-    PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, gText_Accuracy2, 0, 17, 0, 1);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, gText_Accuracy2, 0, SUMMARY_UI(13, 17), 0, 1);
     PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_APPEAL_JAM, gText_Appeal, 0, 1, 0, 1);
-    PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_APPEAL_JAM, gText_Jam, 0, 17, 0, 1);
+    PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_APPEAL_JAM, gText_Jam, 0, SUMMARY_UI(13, 17), 0, 1);
 }
 
 static void PutPageWindowTilemaps(u8 page)
 {
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(page);
+#endif
     u8 i;
 
     ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TITLE);
@@ -3362,6 +3526,9 @@ static void PutPageWindowTilemaps(u8 page)
 
 static void ClearPageWindowTilemaps(u8 page)
 {
+#ifdef FIRERED
+    ClearFireRedSummaryHeaders();
+#endif
     u8 i;
 
     switch (page)
@@ -3434,6 +3601,9 @@ static void RemoveWindowByIndex(u8 windowIndex)
 
 static void PrintPageSpecificText(u8 pageIndex)
 {
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(pageIndex);
+#endif
     u16 i;
     for (i = 0; i < ARRAY_COUNT(sMonSummaryScreen->windowIds); i++)
     {
@@ -3526,14 +3696,24 @@ static void PrintMonOTID(void)
 
 static void PrintMonAbilityName(void)
 {
+#ifdef FIRERED
+    return; // The ability name is in the dedicated header, above the description.
+#else
     enum Ability ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
     PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilitiesInfo[ability].name, 0, 1, 0, 1);
+#endif
 }
 
 static void PrintMonAbilityDescription(void)
 {
     enum Ability ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
-    PrintTextOnWindowToFit(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilitiesInfo[ability].description, 0, 17, 0, 0);
+    PrintTextOnWindowToFit(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilitiesInfo[ability].description, 0,
+#ifdef FIRERED
+        0,
+#else
+        17,
+#endif
+        0, 0);
 }
 
 static void BufferMonTrainerMemo(void)
@@ -3920,7 +4100,7 @@ static void PrintLeftColumnStats(void)
     int x;
 
     if (sMonSummaryScreen->skillsPageMode == SUMMARY_SKILLS_MODE_IVS && !P_SUMMARY_SCREEN_IV_EV_VALUES)
-        x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 46);
+        x = GetStringRightAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gStringVar4, 46);
     else
         x = 4;
 
@@ -3943,7 +4123,7 @@ static void PrintRightColumnStats(void)
     int x;
 
     if (sMonSummaryScreen->skillsPageMode == SUMMARY_SKILLS_MODE_IVS && !P_SUMMARY_SCREEN_IV_EV_VALUES)
-        x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 20);
+        x = GetStringRightAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gStringVar4, 20);
     else
         x = 2;
 
@@ -3958,7 +4138,7 @@ static void PrintExpPointsNextLevel(void)
     u32 expToNextLevel;
 
     ConvertIntToDecimalStringN(gStringVar1, sum->exp, STR_CONV_MODE_RIGHT_ALIGN, 7);
-    x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
+    x = GetStringRightAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gStringVar1, 42) + 2;
     PrintTextOnWindow(windowId, gStringVar1, x, 1, 0, 0);
 
     if (sum->level < MAX_LEVEL)
@@ -3967,8 +4147,8 @@ static void PrintExpPointsNextLevel(void)
         expToNextLevel = 0;
 
     ConvertIntToDecimalStringN(gStringVar1, expToNextLevel, STR_CONV_MODE_RIGHT_ALIGN, 6);
-    x = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar1, 42) + 2;
-    PrintTextOnWindow(windowId, gStringVar1, x, 17, 0, 0);
+    x = GetStringRightAlignXOffset(SUMMARY_UI(FONT_SMALL_NARROW, FONT_NORMAL), gStringVar1, 42) + 2;
+    PrintTextOnWindow(windowId, gStringVar1, x, SUMMARY_UI(13, 17), 0, 0);
 }
 
 static void PrintBattleMoves(void)
@@ -4051,6 +4231,17 @@ static void PrintMoveNameAndPP(u8 moveIndex)
     {
         pp = CalculatePPWithBonus(move, summary->ppBonuses, moveIndex);
         PrintTextOnWindowToFit(moveNameWindowId, GetMoveName(move), 0, moveIndex * 16 + 1, 0, 1);
+#ifdef FIRERED
+        StringCopy(gStringVar4, COMPOUND_STRING("PP "));
+        ConvertIntToDecimalStringN(gStringVar1, summary->pp[moveIndex], STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringAppend(gStringVar4, gStringVar1);
+        StringAppend(gStringVar4, gText_Slash);
+        ConvertIntToDecimalStringN(gStringVar1, pp, STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringAppend(gStringVar4, gStringVar1);
+        text = gStringVar4;
+        ppState = GetCurrentPPToMaxPPState(summary->pp[moveIndex], pp) + 9;
+        x = max(0, GetStringRightAlignXOffset(FONT_SMALL, text, 46));
+#else
         ConvertIntToDecimalStringN(gStringVar1, summary->pp[moveIndex], STR_CONV_MODE_RIGHT_ALIGN, 2);
         ConvertIntToDecimalStringN(gStringVar2, pp, STR_CONV_MODE_RIGHT_ALIGN, 2);
         DynamicPlaceholderTextUtil_Reset();
@@ -4060,6 +4251,7 @@ static void PrintMoveNameAndPP(u8 moveIndex)
         text = gStringVar4;
         ppState = GetCurrentPPToMaxPPState(summary->pp[moveIndex], pp) + 9;
         x = GetStringRightAlignXOffset(FONT_NORMAL, text, 44);
+#endif
     }
     else
     {
@@ -4069,7 +4261,7 @@ static void PrintMoveNameAndPP(u8 moveIndex)
         x = GetStringCenterAlignXOffset(FONT_NORMAL, text, 44);
     }
 
-    PrintTextOnWindow(ppValueWindowId, text, x, moveIndex * 16 + 1, 0, ppState);
+    PrintTextOnWindowWithFont(ppValueWindowId, text, x, moveIndex * 16 + 1, 0, ppState, SUMMARY_UI(FONT_SMALL, FONT_NORMAL));
 }
 
 static void PrintMovePowerAndAccuracy(enum Move moveIndex)
@@ -4103,7 +4295,7 @@ static void PrintMovePowerAndAccuracy(enum Move moveIndex)
             text = gStringVar1;
         }
 
-        PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, text, 53, 17, 0, 0);
+        PrintTextOnWindow(PSS_LABEL_WINDOW_MOVES_POWER_ACC, text, 53, SUMMARY_UI(13, 17), 0, 0);
     }
 }
 
@@ -4175,6 +4367,9 @@ static void PrintContestMoveDescription(u8 moveSlot)
 
 static void PrintMoveDetails(enum Move move)
 {
+#ifdef FIRERED
+    sMonSummaryScreen->shownMove = move;
+#endif
     u8 windowId = AddWindowFromTemplateList(sPageMovesTemplate, PSS_DATA_WINDOW_MOVE_DESCRIPTION);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
     if (move != MOVE_NONE)
@@ -4197,6 +4392,9 @@ static void PrintMoveDetails(enum Move move)
         ClearWindowTilemap(windowId);
     }
 
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(sMonSummaryScreen->currPageIndex);
+#endif
     ScheduleBgCopyTilemapToVram(0);
 }
 
@@ -4223,7 +4421,17 @@ static void PrintNewMoveDetailsOrCancelText(void)
         DynamicPlaceholderTextUtil_SetPlaceholderPtr(0, gStringVar1);
         DynamicPlaceholderTextUtil_SetPlaceholderPtr(1, gStringVar1);
         DynamicPlaceholderTextUtil_ExpandPlaceholders(gStringVar4, sMovesPPLayout);
+#ifdef FIRERED
+        ConvertIntToDecimalStringN(gStringVar1, GetMovePP(move), STR_CONV_MODE_LEFT_ALIGN, 2);
+        StringCopy(gStringVar4, COMPOUND_STRING("PP "));
+        StringAppend(gStringVar4, gStringVar1);
+        StringAppend(gStringVar4, gText_Slash);
+        StringAppend(gStringVar4, gStringVar1);
+        PrintTextOnWindowWithFont(windowId2, gStringVar4,
+            max(0, GetStringRightAlignXOffset(FONT_SMALL, gStringVar4, 46)), 65, 0, 12, FONT_SMALL);
+#else
         PrintTextOnWindow(windowId2, gStringVar4, GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 44), 65, 0, 12);
+#endif
     }
 }
 

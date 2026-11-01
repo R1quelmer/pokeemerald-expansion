@@ -72,7 +72,11 @@ static void DrawBgWindowFrames(void);
 
 EWRAM_DATA static bool8 sArrowPressed = FALSE;
 
+#ifdef FIRERED
+static const u8 gText_Option[]             = _("CONFIGURATION");
+#else
 static const u8 gText_Option[]             = _("OPTION");
+#endif
 static const u8 gText_TextSpeedSlow[]      = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}SLOW");
 static const u8 gText_TextSpeedMid[]       = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}MID");
 static const u8 gText_TextSpeedFast[]      = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}FAST");
@@ -88,7 +92,11 @@ static const u8 gText_ButtonTypeNormal[]   = _("{COLOR GREEN}{SHADOW LIGHT_GREEN
 static const u8 gText_ButtonTypeLR[]       = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}LR");
 static const u8 gText_ButtonTypeLEqualsA[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}L=A");
 
+#ifdef FIRERED
+static const u16 sOptionMenuText_Pal[] = INCGFX_U16("graphics/ui/firered/options_text.pal", ".gbapal");
+#else
 static const u16 sOptionMenuText_Pal[] = INCGFX_U16("graphics/interface/option_menu_text.pal", ".gbapal");
+#endif
 // note: this is only used in the Japanese release
 static const u8 sEqualSignGfx[] = INCGFX_U8("graphics/interface/option_menu_equals_sign.png", ".4bpp");
 
@@ -148,7 +156,11 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
     }
 };
 
+#ifdef FIRERED
+static const u16 sOptionMenuBg_Pal[] = {RGB(1, 2, 4)};
+#else
 static const u16 sOptionMenuBg_Pal[] = {RGB(17, 18, 31)};
+#endif
 
 static void MainCB2(void)
 {
@@ -197,7 +209,11 @@ void CB2_InitOptionMenu(void)
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG1 | WINOUT_WIN01_CLR);
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_DARKEN);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
+#ifdef FIRERED
+        SetGpuReg(REG_OFFSET_BLDY, 2);
+#else
         SetGpuReg(REG_OFFSET_BLDY, 4);
+#endif
         SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
         ShowBg(0);
         ShowBg(1);
@@ -633,8 +649,15 @@ static void ButtonMode_DrawChoices(u8 selection)
 
 static void DrawHeaderText(void)
 {
+#ifdef FIRERED
+    static const u8 colors[] = {8, 2, 8};
+    FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(8));
+    FillWindowPixelRect(WIN_HEADER, 9, 0, 14, 208, 2);
+    AddTextPrinterParameterized3(WIN_HEADER, FONT_NORMAL, 8, 1, colors, TEXT_SKIP_DRAW, gText_Option);
+#else
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
     AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, gText_Option, 8, 1, TEXT_SKIP_DRAW, NULL);
+#endif
     CopyWindowToVram(WIN_HEADER, COPYWIN_FULL);
 }
 
@@ -644,7 +667,13 @@ static void DrawOptionMenuTexts(void)
 
     FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
     for (i = 0; i < MENUITEM_COUNT; i++)
+    {
         AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, (i * 16) + 1, TEXT_SKIP_DRAW, NULL);
+#ifdef FIRERED
+        FillWindowPixelRect(WIN_OPTIONS, 7, 8, (i * 16) + 15, 200, 1);
+        FillWindowPixelRect(WIN_OPTIONS, 9, 0, (i * 16) + 3, 2, 10);
+#endif
+    }
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
 }
 

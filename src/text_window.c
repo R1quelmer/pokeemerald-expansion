@@ -7,6 +7,61 @@
 #include "graphics.h"
 #include "menu.h"
 
+#ifdef FIRERED
+static const u16 sStdTextWindow_Gfx[]  = INCGFX_U16("graphics/ui/firered/frames/std.png", ".4bpp");
+
+const u8 gTextWindowFrame1_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/1.png", ".4bpp");
+static const u8 sTextWindowFrame2_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/2.png", ".4bpp");
+static const u8 sTextWindowFrame3_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/3.png", ".4bpp");
+static const u8 sTextWindowFrame4_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/4.png", ".4bpp");
+static const u8 sTextWindowFrame5_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/5.png", ".4bpp");
+static const u8 sTextWindowFrame6_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/6.png", ".4bpp");
+static const u8 sTextWindowFrame7_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/7.png", ".4bpp");
+static const u8 sTextWindowFrame8_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/8.png", ".4bpp");
+static const u8 sTextWindowFrame9_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/9.png", ".4bpp");
+static const u8 sTextWindowFrame10_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/10.png", ".4bpp");
+static const u8 sTextWindowFrame11_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/11.png", ".4bpp");
+static const u8 sTextWindowFrame12_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/12.png", ".4bpp");
+static const u8 sTextWindowFrame13_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/13.png", ".4bpp");
+static const u8 sTextWindowFrame14_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/14.png", ".4bpp");
+static const u8 sTextWindowFrame15_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/15.png", ".4bpp");
+static const u8 sTextWindowFrame16_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/16.png", ".4bpp");
+static const u8 sTextWindowFrame17_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/17.png", ".4bpp");
+static const u8 sTextWindowFrame18_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/18.png", ".4bpp");
+static const u8 sTextWindowFrame19_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/19.png", ".4bpp");
+static const u8 sTextWindowFrame20_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/20.png", ".4bpp");
+
+const u16 gTextWindowFrame1_Pal[] = INCGFX_U16("graphics/ui/firered/frames/1.png", ".gbapal");
+static const u16 sTextWindowFrame2_Pal[] = INCGFX_U16("graphics/ui/firered/frames/2.png", ".gbapal");
+static const u16 sTextWindowFrame3_Pal[] = INCGFX_U16("graphics/ui/firered/frames/3.png", ".gbapal");
+static const u16 sTextWindowFrame4_Pal[] = INCGFX_U16("graphics/ui/firered/frames/4.png", ".gbapal");
+static const u16 sTextWindowFrame5_Pal[] = INCGFX_U16("graphics/ui/firered/frames/5.png", ".gbapal");
+static const u16 sTextWindowFrame6_Pal[] = INCGFX_U16("graphics/ui/firered/frames/6.png", ".gbapal");
+static const u16 sTextWindowFrame7_Pal[] = INCGFX_U16("graphics/ui/firered/frames/7.png", ".gbapal");
+static const u16 sTextWindowFrame8_Pal[] = INCGFX_U16("graphics/ui/firered/frames/8.png", ".gbapal");
+static const u16 sTextWindowFrame9_Pal[] = INCGFX_U16("graphics/ui/firered/frames/9.png", ".gbapal");
+static const u16 sTextWindowFrame10_Pal[] = INCGFX_U16("graphics/ui/firered/frames/10.png", ".gbapal");
+static const u16 sTextWindowFrame11_Pal[] = INCGFX_U16("graphics/ui/firered/frames/11.png", ".gbapal");
+static const u16 sTextWindowFrame12_Pal[] = INCGFX_U16("graphics/ui/firered/frames/12.png", ".gbapal");
+static const u16 sTextWindowFrame13_Pal[] = INCGFX_U16("graphics/ui/firered/frames/13.png", ".gbapal");
+static const u16 sTextWindowFrame14_Pal[] = INCGFX_U16("graphics/ui/firered/frames/14.png", ".gbapal");
+static const u16 sTextWindowFrame15_Pal[] = INCGFX_U16("graphics/ui/firered/frames/15.png", ".gbapal");
+static const u16 sTextWindowFrame16_Pal[] = INCGFX_U16("graphics/ui/firered/frames/16.png", ".gbapal");
+static const u16 sTextWindowFrame17_Pal[] = INCGFX_U16("graphics/ui/firered/frames/17.png", ".gbapal");
+static const u16 sTextWindowFrame18_Pal[] = INCGFX_U16("graphics/ui/firered/frames/18.png", ".gbapal");
+static const u16 sTextWindowFrame19_Pal[] = INCGFX_U16("graphics/ui/firered/frames/19.png", ".gbapal");
+static const u16 sTextWindowFrame20_Pal[] = INCGFX_U16("graphics/ui/firered/frames/20.png", ".gbapal");
+
+static const u16 sTextWindowPalettes[][16] =
+{
+    INCGFX_U16("graphics/ui/firered/frames/message_box.png", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/frames/text_pal1.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/frames/text_pal2.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/frames/text_pal3.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/frames/text_pal4.pal", ".gbapal")
+};
+
+#else
 static const u16 sStdTextWindow_Gfx[]  = INCGFX_U16("graphics/text_window/std.png", ".4bpp");
 
 const u8 gTextWindowFrame1_Gfx[] = INCGFX_U8("graphics/text_window/1.png", ".4bpp");
@@ -60,6 +115,8 @@ static const u16 sTextWindowPalettes[][16] =
     INCGFX_U16("graphics/text_window/text_pal4.pal", ".gbapal")
 };
 
+#endif
+
 static const struct TilesPal sWindowFrames[WINDOW_FRAMES_COUNT] =
 {
     {gTextWindowFrame1_Gfx, gTextWindowFrame1_Pal},
@@ -84,7 +141,11 @@ static const struct TilesPal sWindowFrames[WINDOW_FRAMES_COUNT] =
     {sTextWindowFrame20_Gfx, sTextWindowFrame20_Pal}
 };
 
+#ifdef FIRERED
+static const u16 sTextWindowDexNavFrame[] = INCGFX_U16("graphics/ui/firered/frames/dexnav_pal.pal", ".gbapal");
+#else
 static const u16 sTextWindowDexNavFrame[] = INCGFX_U16("graphics/text_window/dexnav_pal.pal", ".gbapal");
+#endif
 static const struct TilesPal sDexNavWindowFrame = {gTextWindowFrame1_Gfx, sTextWindowDexNavFrame};
 
 // code

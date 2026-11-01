@@ -2,6 +2,9 @@
 #define GUARD_TYPE_ICONS_H
 
 void LoadTypeIcons(enum BattlerId battler);
+#ifdef FIRERED
+void CreateHealthboxTypeIcons(enum BattlerId battler, u8 healthboxSpriteId);
+#endif
 
 #define TYPE_ICON_TAG 0x2720
 #define TYPE_ICON_TAG_2 0x2721

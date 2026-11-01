@@ -187,7 +187,12 @@ EWRAM_DATA static struct NamingScreenData *sNamingScreen = NULL;
 
 static const u8 sPCIconOff_Gfx[] = INCGFX_U8("graphics/naming_screen/pc_icon_off.png", ".4bpp");
 static const u8 sPCIconOn_Gfx[] = INCGFX_U8("graphics/naming_screen/pc_icon_on.png", ".4bpp");
+#ifdef FIRERED
+static const u16 sKeyboard_Pal[] = INCGFX_U16("graphics/ui/firered/naming_keyboard.pal", ".gbapal");
+static const u16 sNamingIcon_Pal[] = INCGFX_U16("graphics/ui/firered/naming_icon.pal", ".gbapal");
+#else
 static const u16 sKeyboard_Pal[] = INCGFX_U16("graphics/naming_screen/keyboard.pal", ".gbapal");
+#endif
 static const u16 sRival_Gfx[] = INCGFX_U16("graphics/naming_screen/rival.png", ".4bpp");
 static const u16 sRival_Pal[] = INCGFX_U16("graphics/naming_screen/rival.pal", ".gbapal");
 
@@ -257,7 +262,11 @@ static const struct WindowTemplate sWindowTemplates[WIN_COUNT + 1] =
         .tilemapTop = 6,
         .width = 17,
         .height = 2,
+#ifdef FIRERED
+        .paletteNum = 11,
+#else
         .paletteNum = 10,
+#endif
         .baseBlock = 0x030
     },
     [WIN_TEXT_ENTRY_BOX] = {
@@ -266,7 +275,11 @@ static const struct WindowTemplate sWindowTemplates[WIN_COUNT + 1] =
         .tilemapTop = 4,
         .width = 17,
         .height = 2,
+#ifdef FIRERED
+        .paletteNum = 11,
+#else
         .paletteNum = 10,
+#endif
         .baseBlock = 0x052
     },
     [WIN_BANNER] = {
@@ -2638,7 +2651,11 @@ static const struct SpriteSheet sSpriteSheets[] =
 
 static const struct SpritePalette sSpritePalettes[] =
 {
+#ifdef FIRERED
+    {sNamingIcon_Pal, PALTAG_MENU},
+#else
     {gNamingScreenMenu_Pal[0], PALTAG_MENU},
+#endif
     {gNamingScreenMenu_Pal[1], PALTAG_PAGE_SWAP_UPPER},
     {gNamingScreenMenu_Pal[2], PALTAG_PAGE_SWAP_LOWER},
     {gNamingScreenMenu_Pal[3], PALTAG_PAGE_SWAP_OTHERS},

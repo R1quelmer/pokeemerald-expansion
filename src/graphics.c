@@ -1,9 +1,21 @@
 #include "global.h"
 #include "graphics.h"
 
+#ifdef FIRERED
+const u32 gBattleTextboxTiles[] = INCGFX_U32("graphics/battle_interface/firered/textbox.png", ".4bpp.smol");
+#else
 const u32 gBattleTextboxTiles[] = INCGFX_U32("graphics/battle_interface/textbox.png", ".4bpp.smol");
+#endif
+#ifdef FIRERED
+const u16 gBattleTextboxPalette[] = INCBIN_U16("graphics/battle_interface/firered/textbox.gbapal");
+#else
 const u16 gBattleTextboxPalette[] = INCBIN_U16("graphics/battle_interface/textbox.gbapal");
+#endif
+#ifdef FIRERED
+const u32 gBattleTextboxTilemap[] = INCGFX_U32("graphics/battle_interface/firered/textbox_map.bin", ".smolTM");
+#else
 const u32 gBattleTextboxTilemap[] = INCGFX_U32("graphics/battle_interface/textbox_map.bin", ".smolTM");
+#endif
 
 const u32 gUnusedGfx_OldCharmap[] = INCGFX_U32("graphics/unused/old_charmap.png", ".4bpp.smol"); // japanese table and bunch of stuff
 const u32 gUnusedTimemap_OldCharmap[] = INCGFX_U32("graphics/unused/old_charmap.bin", ".smolTM");
@@ -707,10 +719,35 @@ const u32 gUnusedTilemap_BasicFrame[] = INCGFX_U32("graphics/unused/basic_frame.
 
 // Battle Interface
 
+#ifdef FIRERED
+const u16 gBattleInterface_BallStatusBarPal[] = INCGFX_U16("graphics/battle_interface/firered/ball_status_bar.png", ".gbapal");
+#else
 const u16 gBattleInterface_BallStatusBarPal[] = INCGFX_U16("graphics/battle_interface/ball_status_bar.png", ".gbapal");
+#endif
 
+#ifdef FIRERED
+const u16 gBattleInterface_BallDisplayPal[] = INCGFX_U16("graphics/battle_interface/firered/ball_display.png", ".gbapal");
+#else
 const u16 gBattleInterface_BallDisplayPal[] = INCGFX_U16("graphics/battle_interface/ball_display.png", ".gbapal");
+#endif
 
+#ifdef FIRERED
+const u8 gHealthboxElementsGfxTable[][32] = INCBIN_U8("graphics/battle_interface/firered/hpbar.4bpp",
+                                                  "graphics/battle_interface/firered/expbar.4bpp",
+                                                  "graphics/battle_interface/status.4bpp",
+                                                  "graphics/battle_interface/firered/misc.4bpp",
+                                                  "graphics/battle_interface/firered/hpbar_anim.4bpp",
+                                                  "graphics/battle_interface/firered/misc_frameend.4bpp",
+                                                  "graphics/battle_interface/firered/ball_display.4bpp",
+                                                  "graphics/battle_interface/ball_caught_indicator.4bpp",
+                                                  "graphics/battle_interface/status2.4bpp", // these three duplicate sets of graphics are for the opponent/partner Pokémon
+                                                  "graphics/battle_interface/status3.4bpp",
+                                                  "graphics/battle_interface/status4.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_player_frameend.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_player_frameend_bar.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_opponent_frameend.4bpp",
+                                                  "graphics/battle_interface/firered/healthbox_doubles_opponent_frameend_bar.4bpp");
+#else
 const u8 gHealthboxElementsGfxTable[][32] = INCBIN_U8("graphics/battle_interface/hpbar.4bpp",
                                                   "graphics/battle_interface/expbar.4bpp",
                                                   "graphics/battle_interface/status.4bpp",
@@ -726,6 +763,7 @@ const u8 gHealthboxElementsGfxTable[][32] = INCBIN_U8("graphics/battle_interface
                                                   "graphics/battle_interface/healthbox_doubles_player_frameend_bar.4bpp",
                                                   "graphics/battle_interface/healthbox_doubles_opponent_frameend.4bpp",
                                                   "graphics/battle_interface/healthbox_doubles_opponent_frameend_bar.4bpp");
+#endif
 const u32 gBattleInterfaceGfx_UnusedWindow3[] = INCGFX_U32("graphics/battle_interface/unused_window3.png", ".4bpp.smol");
 const u32 gBattleInterfaceGfx_UnusedWindow4[] = INCGFX_U32("graphics/battle_interface/unused_window4.png", ".4bpp.smol");
 
@@ -1000,12 +1038,36 @@ const u16 gBattleAnimSpritePal_Eye[] = INCGFX_U16("graphics/battle_anims/sprites
 const u32 gBattleAnimSpriteGfx_Tendrils[] = INCGFX_U32("graphics/battle_anims/sprites/tendrils.png", ".4bpp.smol");
 const u16 gBattleAnimSpritePal_Tendrils[] = INCGFX_U16("graphics/battle_anims/sprites/tendrils.png", ".gbapal");
 
+#ifdef FIRERED
+const u32 gHealthboxSinglesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_singles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#else
 const u32 gHealthboxSinglesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_singles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxSinglesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_singles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#else
 const u32 gHealthboxSinglesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_singles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxSinglesOpponentLargeGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_singles_opponent_large.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#else
 const u32 gHealthboxSinglesOpponentLargeGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_singles_opponent_large.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxDoublesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_doubles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#else
 const u32 gHealthboxDoublesPlayerGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_doubles_player.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxDoublesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_doubles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#else
 const u32 gHealthboxDoublesOpponentGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_doubles_opponent.png", ".4bpp.smol", "-mwidth 8 -mheight 4");
+#endif
+#ifdef FIRERED
+const u32 gHealthboxSafariGfx[] = INCGFX_U32("graphics/battle_interface/firered/healthbox_safari.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#else
 const u32 gHealthboxSafariGfx[] = INCGFX_U32("graphics/battle_interface/healthbox_safari.png", ".4bpp.smol", "-mwidth 8 -mheight 8");
+#endif
 
 const u32 gUnusedGfx_Shadow[] = INCGFX_U32("graphics/unused/shadow.png", ".4bpp.smol");
 const u16 gUnusedPal_Shadow[] = INCGFX_U16("graphics/unused/shadow.png", ".gbapal");
@@ -1349,7 +1411,11 @@ const u16 gDomeTourneyMatchCardBg_Pal[] = INCGFX_U16("graphics/battle_frontier/t
 const u32 gBattleArenaJudgmentSymbolsGfx[] = INCGFX_U32("graphics/battle_frontier/arena_judgment_symbols.png", ".4bpp.smol");
 const u16 gBattleArenaJudgmentSymbolsPalette[] = INCGFX_U16("graphics/battle_frontier/arena_judgment_symbols.png", ".gbapal");
 
+#ifdef FIRERED
+const u16 gBattleWindowTextPalette[] = INCGFX_U16("graphics/battle_interface/firered/text.pal", ".gbapal");
+#else
 const u16 gBattleWindowTextPalette[] = INCGFX_U16("graphics/battle_interface/text.pal", ".gbapal");
+#endif
 const u16 gPPTextPalette[] = INCGFX_U16("graphics/battle_interface/text_pp.pal", ".gbapal");
 
 const u16 gTilesetAnims_BattleDomePals0_0[] = INCGFX_U16("graphics/battle_frontier/dome_anim1.pal", ".gbapal");
@@ -1699,7 +1765,11 @@ const u16 gBattleAnimBGPalette_Swamp[] = INCGFX_U16("graphics/battle_anims/backg
 const u32 gBattleAnimBgTilemap_Swamp[] = INCGFX_U32("graphics/battle_anims/backgrounds/swampswizzle.bin", ".smolTM");
 
 const u32 gPartyMenuBg_Gfx[] = INCGFX_U32("graphics/party_menu/bg.png", ".4bpp.smol", "-num_tiles 62 -Wnum_tiles");
+#ifdef FIRERED
+const u16 gPartyMenuBg_Pal[] = INCGFX_U16("graphics/ui/firered/party_native.pal", ".gbapal");
+#else
 const u16 gPartyMenuBg_Pal[] = INCGFX_U16("graphics/party_menu/bg.png", ".gbapal");
+#endif
 const u32 gPartyMenuBg_Tilemap[] = INCGFX_U32("graphics/party_menu/bg.bin", ".smolTM");
 
 const u32 gPartyMenuPokeball_Gfx[] = INCGFX_U32("graphics/party_menu/pokeball.png", ".4bpp.smol");
@@ -1716,8 +1786,25 @@ const u32 gMoveTypes_Gfx[] = INCGFX_U32("graphics/types/move_types.4bpp", ".smol
 const u16 gMoveTypes_Pal[] = INCBIN_U16("graphics/types/move_types.gbapal");
 
 const u32 gSummaryMoveSelect_Gfx[] = INCGFX_U32("graphics/summary_screen/move_select.png", ".4bpp.smol");
+#ifdef FIRERED
+const u16 gSummaryMoveSelect_Pal[] = INCGFX_U16("graphics/ui/firered/summary_selector.pal", ".gbapal");
+#else
 const u16 gSummaryMoveSelect_Pal[] = INCGFX_U16("graphics/summary_screen/move_select.png", ".gbapal");
+#endif
 
+#ifdef FIRERED
+#if P_SUMMARY_SCREEN_IV_EV_TILESET
+const u32 gSummaryScreen_Gfx[] = INCGFX_U32("graphics/ui/firered/summary_iv_ev_tiles.png", ".4bpp.smol");
+#else
+const u32 gSummaryScreen_Gfx[] = INCGFX_U32("graphics/ui/firered/summary_tiles.png", ".4bpp.smol");
+#endif
+const u16 gSummaryScreen_Pal[] = INCGFX_U16("graphics/ui/firered/summary.pal", ".gbapal");
+const u32 gSummaryPage_Info_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_info.bin", ".smolTM");
+const u32 gSummaryPage_Skills_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_skills.bin", ".smolTM");
+const u32 gSummaryPage_BattleMoves_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_battle_moves.bin", ".smolTM");
+const u32 gSummaryPage_ContestMoves_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_contest_moves.bin", ".smolTM");
+const u32 gSummaryPage_InfoEgg_Tilemap[] = INCGFX_U32("graphics/ui/firered/summary_info_egg.bin", ".smolTM");
+#else
 #if P_SUMMARY_SCREEN_IV_EV_TILESET
 const u32 gSummaryScreen_Gfx[]                = INCGFX_U32("graphics/summary_screen/iv_ev_tiles.png", ".4bpp.smol");
 #else
@@ -1729,16 +1816,24 @@ const u32 gSummaryPage_Skills_Tilemap[]       = INCGFX_U32("graphics/summary_scr
 const u32 gSummaryPage_BattleMoves_Tilemap[]  = INCGFX_U32("graphics/summary_screen/page_battle_moves.bin", ".smolTM");
 const u32 gSummaryPage_ContestMoves_Tilemap[] = INCGFX_U32("graphics/summary_screen/page_contest_moves.bin", ".smolTM");
 const u32 gSummaryPage_InfoEgg_Tilemap[]      = INCGFX_U32("graphics/summary_screen/page_info_egg.bin", ".smolTM");
+#endif
 
 const u32 gBagMaleTiles[] = INCGFX_U32("graphics/bag/bag_male.png", ".4bpp.smol");
 const u32 gBagFemaleTiles[] = INCGFX_U32("graphics/bag/bag_female.png", ".4bpp.smol");
 const u16 gBagPalette[] = INCGFX_U16("graphics/bag/bag.pal", ".gbapal");
 
+#ifdef FIRERED
+const u16 gBagScreenMale_Pal[] = INCGFX_U16("graphics/ui/firered/bag.pal", ".gbapal");
+const u16 gBagScreenFemale_Pal[] = INCGFX_U16("graphics/ui/firered/bag.pal", ".gbapal");
+const u32 gBagScreen_Gfx[] = INCGFX_U32("graphics/ui/firered/bag_background.png", ".4bpp.smol");
+const u32 gBagScreen_GfxTileMap[] = INCGFX_U32("graphics/ui/firered/bag_background.bin", ".smolTM");
+#else
 const u16 gBagScreenMale_Pal[] = INCGFX_U16("graphics/bag/menu_male.pal", ".gbapal");
 const u16 gBagScreenFemale_Pal[] = INCGFX_U16("graphics/bag/menu_female.pal", ".gbapal");
 
 const u32 gBagScreen_Gfx[] = INCGFX_U32("graphics/bag/menu.png", ".4bpp.smol", "-num_tiles 53 -Wnum_tiles");
 const u32 gBagScreen_GfxTileMap[] = INCGFX_U32("graphics/bag/menu.bin", ".smolTM");
+#endif
 
 const u32 gBattlePyramidBag_Gfx[]          = INCGFX_U32("graphics/bag/bag_pyramid.png", ".4bpp.smol");
 const u16 gBattlePyramidBag_Pal[]          = INCGFX_U16("graphics/bag/bag_pyramid.pal", ".gbapal"); // female palette is first and male is second.
@@ -1749,7 +1844,11 @@ const u32 gSwapLineGfx[] = INCGFX_U32("graphics/interface/swap_line.png", ".4bpp
 const u16 gSwapLinePal[] = INCGFX_U16("graphics/interface/swap_line.png", ".gbapal");
 
 const u32 gShopMenu_Gfx[] = INCGFX_U32("graphics/shop/menu.png", ".4bpp.smol");
+#ifdef FIRERED
+const u16 gShopMenu_Pal[] = INCGFX_U16("graphics/ui/firered/shop.pal", ".gbapal");
+#else
 const u16 gShopMenu_Pal[] = INCGFX_U16("graphics/shop/menu.png", ".gbapal");
+#endif
 const u32 gShopMenu_Tilemap[] = INCGFX_U32("graphics/shop/menu.bin", ".smolTM");
 const u32 gShopMenuMoney_Gfx[] = INCGFX_U32("graphics/shop/money.png", ".4bpp.smol");
 
@@ -1827,9 +1926,15 @@ const u16 gFrontierPassMedalsSilver_Pal[] = INCGFX_U16("graphics/frontier_pass/s
 const u16 gFrontierPassMedalsGold_Pal[] = INCGFX_U16("graphics/frontier_pass/gold.pal", ".gbapal");
 
 // Pokédex
+#ifdef FIRERED
+const u16 gPokedexBgHoenn_Pal[] = INCGFX_U16("graphics/ui/firered/dex_hoenn.pal", ".gbapal");
+const u16 gPokedexSearchResults_Pal[] = INCGFX_U16("graphics/ui/firered/dex_results.pal", ".gbapal");
+const u16 gPokedexBgNational_Pal[] = INCGFX_U16("graphics/ui/firered/dex_national.pal", ".gbapal");
+#else
 const u16 gPokedexBgHoenn_Pal[] = INCGFX_U16("graphics/pokedex/bg_hoenn.pal", ".gbapal");
 const u16 gPokedexSearchResults_Pal[] = INCGFX_U16("graphics/pokedex/search_results_bg.pal", ".gbapal");
 const u16 gPokedexBgNational_Pal[] = INCGFX_U16("graphics/pokedex/bg_national.pal", ".gbapal");
+#endif
 const u32 gPokedexMenu_Gfx[] = INCGFX_U32("graphics/pokedex/menu.png", ".4bpp.smol");
 const u32 gPokedexInterface_Gfx[] = INCGFX_U32("graphics/pokedex/interface.png", ".4bpp.smol");
 const u32 gUnused_PokedexNoBall[] = INCGFX_U32("graphics/pokedex/noball_unused.png", ".4bpp.smol");
@@ -1842,13 +1947,22 @@ const u32 gPokedexScreenSelectBarMain_Tilemap[] = INCGFX_U32("graphics/pokedex/s
 const u32 gPokedexScreenSelectBarSubmenu_Tilemap[] = INCGFX_U32("graphics/pokedex/screen_select_bar_submenu.bin", ".smolTM");
 const u32 gPokedexInfoScreen_Tilemap[] = INCGFX_U32("graphics/pokedex/info_screen.bin", ".smolTM");
 const u32 gPokedexCryScreen_Tilemap[] = INCGFX_U32("graphics/pokedex/cry_screen.bin", ".smolTM");
+#ifdef FIRERED
+const u16 gPokedexSearchMenu_Pal[] = INCGFX_U16("graphics/ui/firered/dex_search.pal", ".gbapal");
+#else
 const u16 gPokedexSearchMenu_Pal[] = INCGFX_U16("graphics/pokedex/search_menu.pal", ".gbapal");
+#endif
 const u32 gPokedexSearchMenu_Gfx[] = INCGFX_U32("graphics/pokedex/search_menu.png", ".4bpp.smol");
 const u32 gPokedexSearchMenuNational_Tilemap[] = INCGFX_U32("graphics/pokedex/search_menu_national.bin", ".smolTM");
 const u32 gPokedexSearchMenuHoenn_Tilemap[] = INCGFX_U32("graphics/pokedex/search_menu_hoenn.bin", ".smolTM");
 
+#ifdef FIRERED
+const u16 gSummaryScreen_MoveEffect_Battle_Tilemap[] = INCBIN_U16("graphics/ui/firered/summary_effect_battle.bin");
+const u16 gSummaryScreen_MoveEffect_Contest_Tilemap[] = INCBIN_U16("graphics/ui/firered/summary_effect_contest.bin");
+#else
 const u16 gSummaryScreen_MoveEffect_Battle_Tilemap[] = INCBIN_U16("graphics/summary_screen/effect_battle.bin");
 const u16 gSummaryScreen_MoveEffect_Contest_Tilemap[] = INCBIN_U16("graphics/summary_screen/effect_contest.bin");
+#endif
 const u16 gSummaryScreen_MoveEffect_Cancel_Tilemap[] = INCBIN_U16("graphics/summary_screen/effect_cancel.bin");
 
 const u16 gIntroCopyright_Pal[] = INCGFX_U16("graphics/intro/copyright.png", ".gbapal");
@@ -1973,8 +2087,16 @@ const u32 gHoennTrainerCardFront_Tilemap[] = INCGFX_U32("graphics/trainer_card/f
 const u32 gHoennTrainerCardBack_Tilemap[] = INCGFX_U32("graphics/trainer_card/back.bin", ".smolTM");
 const u32 gHoennTrainerCardFrontLink_Tilemap[] = INCGFX_U32("graphics/trainer_card/front_link.bin", ".smolTM");
 
+#ifdef FIRERED
+const u16 gKantoTrainerCardBlue_Pal[] = INCGFX_U16("graphics/ui/firered/trainer_blue.pal", ".gbapal");
+#else
 const u16 gKantoTrainerCardBlue_Pal[] = INCGFX_U16("graphics/trainer_card/frlg/blue.pal", ".gbapal");
+#endif
+#ifdef FIRERED
+const u32 gKantoTrainerCard_Gfx[] = INCGFX_U32("graphics/ui/firered/trainer_tiles.png", ".4bpp.smol");
+#else
 const u32 gKantoTrainerCard_Gfx[] = INCGFX_U32("graphics/trainer_card/frlg/tiles.png", ".4bpp.smol");
+#endif
 const u32 gKantoTrainerCardBg_Tilemap[] = INCGFX_U32("graphics/trainer_card/frlg/bg.bin", ".smolTM");
 const u32 gKantoTrainerCardFront_Tilemap[] = INCGFX_U32("graphics/trainer_card/frlg/front.bin", ".smolTM");
 const u32 gKantoTrainerCardBack_Tilemap[] = INCGFX_U32("graphics/trainer_card/frlg/back.bin", ".smolTM");
@@ -1982,20 +2104,34 @@ const u32 gKantoTrainerCardFrontLink_Tilemap[] = INCGFX_U32("graphics/trainer_ca
 
 // Pokémon storage system
 
+#ifdef FIRERED
+const u32 gStorageSystemMenu_Gfx[] = INCGFX_U32("graphics/ui/firered/storage_menu.png", ".4bpp.smol");
+const u16 gStorageSystemPartyMenu_Pal[] = INCGFX_U16("graphics/ui/firered/storage_party.pal", ".gbapal");
+#else
 const u32 gStorageSystemMenu_Gfx[] = INCGFX_U32("graphics/pokemon_storage/menu.png", ".4bpp.smol");
 const u16 gStorageSystemPartyMenu_Pal[] = INCGFX_U16("graphics/pokemon_storage/party_menu.pal", ".gbapal");
+#endif
 const u32 gStorageSystemPartyMenu_Tilemap[] = INCGFX_U32("graphics/pokemon_storage/party_menu.bin", ".smolTM");
 
 // naming screen
 
 const u16 gNamingScreenMenu_Pal[6][16] =
 {
+#ifdef FIRERED
+    INCGFX_U16("graphics/ui/firered/naming_menu.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_page_upper.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_page_lower.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_page_others.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_buttons.pal", ".gbapal"),
+    INCGFX_U16("graphics/ui/firered/naming_cursor.pal", ".gbapal"),
+#else
     INCGFX_U16("graphics/naming_screen/menu.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/page_swap_upper.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/page_swap_lower.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/page_swap_others.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/buttons.pal", ".gbapal"),
     INCGFX_U16("graphics/naming_screen/cursor.pal", ".gbapal"),
+#endif
 };
 const u32 gNamingScreenMenu_Gfx[]                = INCGFX_U32("graphics/naming_screen/menu.png", ".4bpp.smol");
 const u32 gNamingScreenPageSwapFrame_Gfx[]       = INCGFX_U32("graphics/naming_screen/page_swap_frame.png", ".4bpp");
@@ -2066,9 +2202,21 @@ const u16 gTradeUnused_Tilemap[] = INCBIN_U16("graphics/trade/unused.bin");
 const u16 gTradeMenu_Tilemap[] = INCBIN_U16("graphics/trade/menu.bin");
 const u16 gTradeMenuMonBox_Tilemap[] = INCBIN_U16("graphics/trade/menu_mon_box.bin");
 
+#ifdef FIRERED
+const u16 gMessageBox_Pal[] = INCGFX_U16("graphics/ui/firered/frames/message_box.png", ".gbapal");
+#else
 const u16 gMessageBox_Pal[] = INCGFX_U16("graphics/text_window/message_box.png", ".gbapal");
+#endif
+#ifdef FIRERED
+const u8 gMessageBox_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/message_box.png", ".4bpp");
+#else
 const u8 gMessageBox_Gfx[] = INCGFX_U8("graphics/text_window/message_box.png", ".4bpp");
+#endif
+#ifdef FIRERED
+const u8 gSignpostWindow_Gfx[] = INCGFX_U8("graphics/ui/firered/frames/signpost.png", ".4bpp");
+#else
 const u8 gSignpostWindow_Gfx[] = INCGFX_U8("graphics/text_window/signpost.png", ".4bpp");
+#endif
 
 const u32 gWallpaperIcon_Cross[] = INCGFX_U32("graphics/pokemon_storage/wallpapers/icons/cross.png", ".4bpp.smol");
 const u32 gWallpaperIcon_Bolt[] = INCGFX_U32("graphics/pokemon_storage/wallpapers/icons/bolt.png", ".4bpp.smol");

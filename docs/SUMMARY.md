@@ -2,6 +2,9 @@
 
 - [README](./README.md)
 - [FEATURES](./FEATURES.md)
+- [FireRed battle UI](./firered-battle-ui.md)
+- [FireRed battle type badges](./firered-battle-type-badges.md)
+- [FireRed visual overhaul](./firered-visual-overhaul.md)
 - [Installation](./INSTALL.md)
     - [Setting up WSL1 (Legacy Portion)](./legacy_WSL1_INSTALL.md)
     - [ChromeOS](./install/chromeos/CHROME_OS.md)
@@ -151,3 +154,4 @@
     - [Release Schedule and Process](team_procedures/schedule.md)
     - [Merge Checklist](team_procedures/merge_checklist.md)
     - [Scope Guidelines](team_procedures/scope.md)
+- [FireRed navy UI direction](firered-dark-ui.md)

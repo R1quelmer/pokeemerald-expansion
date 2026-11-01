@@ -8,6 +8,7 @@
 #include "pokedex.h"
 #include "sprite.h"
 #include "type_icons.h"
+#include "battle_util.h"
 
 static void LoadTypeSpritesAndPalettes(void);
 static void LoadTypeIconsPerBattler(enum BattlerId, u32);
@@ -234,6 +235,10 @@ const struct SpriteTemplate sSpriteTemplate_TypeIcons2 =
 
 void LoadTypeIcons(enum BattlerId battler)
 {
+#ifdef FIRERED
+    // FireRed's persistent healthbox badges also cover move/target selection.
+    return;
+#endif
     u32 position;
 
     struct Pokemon* mon = GetBattlerMon(battler);
@@ -259,6 +264,130 @@ static void LoadTypeSpritesAndPalettes(void)
     LoadSpritePalette(&sTypeIconPal1);
     LoadSpritePalette(&sTypeIconPal2);
 }
+
+#ifdef FIRERED
+static const u32 sHealthboxTypeGfx1[] = INCGFX_U32("graphics/ui/firered/battle_type_chips1.png", ".4bpp.smol");
+static const u32 sHealthboxTypeGfx2[] = INCGFX_U32("graphics/ui/firered/battle_type_chips2.png", ".4bpp.smol");
+static const struct CompressedSpriteSheet sHealthboxTypeSheets[] =
+{
+    {sHealthboxTypeGfx1, 8 * 80 / 2, TYPE_ICON_TAG},
+    {sHealthboxTypeGfx2, 8 * 80 / 2, TYPE_ICON_TAG_2},
+};
+static const struct OamData sOamData_HealthboxType =
+{
+    .shape = SPRITE_SHAPE(8x8),
+    .size = SPRITE_SIZE(8x8),
+    .priority = 1,
+};
+static const struct SpriteTemplate sHealthboxTypeTemplate =
+{
+    .tileTag = TYPE_ICON_TAG,
+    .paletteTag = TYPE_ICON_TAG,
+    .oam = &sOamData_HealthboxType,
+    .anims = gDummySpriteAnimTable,
+    .callback = SpriteCallbackDummy,
+};
+
+// Three slots are intentional: Forest's Curse/Trick-or-Treat can add a type.
+// One controller per healthbox only changes the shared atlas frame/palette
+// when the resolved defensive typing changes. No per-frame VRAM uploads.
+static void SpriteCB_HealthboxTypeIcons(struct Sprite *sprite)
+{
+    enum BattlerId battler = sprite->data[0];
+    struct Sprite *healthbox = &gSprites[sprite->data[1]];
+    enum Type types[3], unique[3] = {TYPE_NONE, TYPE_NONE, TYPE_NONE};
+    u32 count = 0;
+    u8 ids[3] = {sprite - gSprites, sprite->data[2], sprite->data[3]};
+
+    GetBattlerTypes(battler, FALSE, types);
+    for (u32 i = 0; i < ARRAY_COUNT(types); i++)
+    {
+        bool32 duplicate = FALSE;
+        if (types[i] == TYPE_NONE || types[i] == TYPE_MYSTERY || types[i] >= NUMBER_OF_MON_TYPES)
+            continue;
+        for (u32 j = 0; j < count; j++)
+            if (unique[j] == types[i])
+                duplicate = TRUE;
+        if (!duplicate)
+            unique[count++] = types[i];
+    }
+    // A typeless battler (e.g. pure Fire after Burn Up) gets one '?' glyph.
+    if (count == 0)
+        unique[count++] = TYPE_MYSTERY;
+#ifdef VISUAL_QA
+    extern volatile u32 gVisualQaBattleState[12];
+    gVisualQaBattleState[battler] = unique[0] | (unique[1] << 8) | (unique[2] << 16) | (count << 24);
+    gVisualQaBattleState[4 + battler] = gBattleMons[battler].species;
+    gVisualQaBattleState[8 + battler] = GetActiveGimmick(battler);
+#endif
+
+    for (u32 i = 0; i < ARRAY_COUNT(ids); i++)
+    {
+        struct Sprite *icon = &gSprites[ids[i]];
+        enum Type type = unique[i];
+        if (sprite->data[4 + i] != type)
+        {
+            if (i < count)
+            {
+                u16 tag = gTypesInfo[type].useSecondTypeIconPalette ? TYPE_ICON_TAG_2 : TYPE_ICON_TAG;
+                u32 frame = type == TYPE_STELLAR ? TYPE_MYSTERY - TYPE_NORMAL
+                    : gTypesInfo[type].useSecondTypeIconPalette ? type - TYPE_FIRE : type - TYPE_NORMAL;
+                icon->sheetTileStart = GetSpriteTileStartByTag(tag) + frame;
+                // The dummy animation is END-only, so it never applies a frame
+                // to OAM. Switch the actual tile along with the cached type.
+                icon->oam.tileNum = icon->sheetTileStart;
+                icon->oam.paletteNum = IndexOfSpritePaletteTag(tag);
+            }
+            sprite->data[4 + i] = type;
+        }
+        // A 21px rail inside each box: never over Pokémon or gimmick triggers.
+        icon->x = healthbox->x + (IsOnPlayerSide(battler) ? -16 : -24);
+        icon->y = healthbox->y + (IsOnPlayerSide(battler) ? -3 : -8) + 7 * i;
+        icon->x2 = healthbox->x2;
+        icon->y2 = healthbox->y2;
+        icon->oam.priority = healthbox->oam.priority;
+        icon->invisible = healthbox->invisible || !IsBattlerAlive(battler) || i >= count;
+    }
+}
+
+void CreateHealthboxTypeIcons(enum BattlerId battler, u8 healthboxSpriteId)
+{
+    u8 ids[3];
+    for (u32 i = 0; i < ARRAY_COUNT(sHealthboxTypeSheets); i++)
+        if (GetSpriteTileStartByTag(sHealthboxTypeSheets[i].tag) == TAG_NONE)
+            LoadCompressedSpriteSheet(&sHealthboxTypeSheets[i]);
+    if (IndexOfSpritePaletteTag(TYPE_ICON_TAG) == UCHAR_MAX)
+        LoadSpritePalette(&sTypeIconPal1);
+    if (IndexOfSpritePaletteTag(TYPE_ICON_TAG_2) == UCHAR_MAX)
+        LoadSpritePalette(&sTypeIconPal2);
+    // Allocators, never fixed OBJ palette slots or hard-coded VRAM addresses.
+    if (IndexOfSpritePaletteTag(TYPE_ICON_TAG) == UCHAR_MAX
+        || IndexOfSpritePaletteTag(TYPE_ICON_TAG_2) == UCHAR_MAX
+        || GetSpriteTileStartByTag(TYPE_ICON_TAG) == TAG_NONE
+        || GetSpriteTileStartByTag(TYPE_ICON_TAG_2) == TAG_NONE)
+        return;
+    for (u32 i = 0; i < ARRAY_COUNT(ids); i++)
+    {
+        ids[i] = CreateSpriteAtEnd(&sHealthboxTypeTemplate, 0, 0, 0);
+        if (ids[i] == MAX_SPRITES)
+        {
+            while (i != 0)
+                DestroySprite(&gSprites[ids[--i]]);
+            return;
+        }
+        gSprites[ids[i]].callback = SpriteCallbackDummy;
+        gSprites[ids[i]].invisible = TRUE;
+    }
+    struct Sprite *controller = &gSprites[ids[0]];
+    controller->data[0] = battler;
+    controller->data[1] = healthboxSpriteId;
+    controller->data[2] = ids[1];
+    controller->data[3] = ids[2];
+    for (u32 i = 0; i < 3; i++)
+        controller->data[4 + i] = -1;
+    controller->callback = SpriteCB_HealthboxTypeIcons;
+}
+#endif
 
 static void LoadTypeIconsPerBattler(enum BattlerId battler, u32 position)
 {

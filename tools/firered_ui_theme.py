@@ -1,0 +1,12 @@
+"""Shared GBA-quantized colors for FireRed's navy interface (not type colors)."""
+NAVY = (8, 16, 32)
+PANEL = (16, 32, 56)
+RAISED = (24, 48, 80)
+BORDER = (40, 72, 112)
+BLUE = (40, 112, 184)
+CYAN = (64, 192, 240)
+TEXT = (232, 240, 248)
+SUBTEXT = (152, 176, 208)
+WARNING = (232, 104, 120)
+GREEN = (64, 192, 112)
+AMBER = (232, 176, 64)

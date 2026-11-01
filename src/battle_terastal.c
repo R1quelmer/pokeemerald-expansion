@@ -60,6 +60,12 @@ void ApplyBattlerVisualsForTeraAnim(enum BattlerId battler)
 // Returns whether the Tera Orb is charged.
 bool32 IsTeraOrbCharged(void)
 {
+#if defined(FIRERED) && defined(VISUAL_QA)
+    // Isolated capture cartridge: provision a charged Orb for these fixtures.
+    extern u8 gVisualQaScene;
+    if ((gVisualQaScene & 0x7F) == 58 || (gVisualQaScene & 0x7F) == 59)
+        return TRUE;
+#endif
     if (FlagGet(B_FLAG_TERA_ORB_NO_COST) || B_TERA_ORB_ALWAYS_CHARGED)
         return TRUE;
     return FlagGet(B_FLAG_TERA_ORB_CHARGED);

@@ -231,6 +231,13 @@ static enum Item GetNextBall(enum Item ballId)
     return ballId;
 }
 
+static void HandleInputChooseAction(enum BattlerId battler);
+#if defined(FIRERED) && defined(VISUAL_QA)
+// Several controllers have a static function with the same name in nm output.
+// Export the exact player's pointer for emulator input synchronization.
+void (*const gVisualQaChooseAction)(enum BattlerId) = HandleInputChooseAction;
+#endif
+
 static void HandleInputChooseAction(enum BattlerId battler)
 {
     enum Item itemId = gBattleResources->bufferA[battler][2] | (gBattleResources->bufferA[battler][3] << 8);

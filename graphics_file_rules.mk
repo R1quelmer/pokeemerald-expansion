@@ -23,6 +23,10 @@ $(BATINTGFXDIR)/textbox.gbapal: $(BATINTGFXDIR)/textbox_0.gbapal \
                                 $(BATINTGFXDIR)/textbox_1.gbapal
 	@cat $^ >$@
 
+$(BATINTGFXDIR)/firered/textbox.gbapal: $(BATINTGFXDIR)/firered/textbox_0.gbapal \
+                                        $(BATINTGFXDIR)/firered/textbox_1.gbapal
+	@cat $^ >$@
+
 $(BTLANMSPRGFXDIR)/ice_cube.4bpp: $(BTLANMSPRGFXDIR)/ice_cube_0.4bpp \
                                   $(BTLANMSPRGFXDIR)/ice_cube_1.4bpp \
                                   $(BTLANMSPRGFXDIR)/ice_cube_2.4bpp \

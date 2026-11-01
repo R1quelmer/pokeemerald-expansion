@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+"""Author FireRed's shared geometric frames and main-menu background (Pillow)."""
+from pathlib import Path
+import struct
+from PIL import Image, ImageDraw
+from firered_ui_theme import NAVY, PANEL, RAISED, BORDER, BLUE, CYAN, TEXT, SUBTEXT, WARNING
+from generate_firered_secondary_ui import generate as secondary_screens
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / 'graphics/ui/firered'
+INK=NAVY; PAPER=TEXT; MUTED=BORDER
+RED=WARNING; VIOLET=BLUE; AMBER=(232,176,64); GREEN=(64,192,112)
+
+def palette(path, colors):
+    path.write_text('JASC-PAL\n0100\n'+str(len(colors))+'\n'+'\n'.join('%d %d %d'%c for c in colors)+'\n',newline='\n')
+
+def save(path, im, colors):
+    im.putpalette([v for c in colors for v in c]+[0]*(768-3*len(colors)))
+    im.save(path,bits=4)
+
+def frame(accent):
+    im=Image.new('P',(24,24),0);d=ImageDraw.Draw(im)
+    d.polygon([(5,2),(18,2),(21,5),(21,21),(2,21),(2,5)],fill=15)
+    d.polygon([(5,4),(18,4),(19,5),(19,19),(4,19),(4,5)],fill=14)
+    d.line((5,3,18,3),fill=13)
+    d.line((3,6,3,18),fill=13)
+    return im
+
+def bag_background():
+    # Retain the tile IDs used by the pocket-switch wipe and indicators.
+    im=Image.new('P',(256,256),0);d=ImageDraw.Draw(im)
+    d.rectangle((0,0,239,159),fill=3)
+    d.polygon([(0,0),(103,0),(111,8),(111,101),(0,101)],fill=4)
+    d.polygon([(0,0),(111,0),(111,27),(102,31),(0,31)],fill=0)
+    d.polygon([(0,104),(103,104),(111,112),(111,151),(0,151)],fill=1)
+    d.polygon([(112,8),(231,8),(239,16),(239,143),(231,151),(112,151)],fill=0)
+    d.rectangle((112,16,231,143),fill=1)
+    d.line((112,9,230,9),fill=4)
+    d.polygon([(0,88),(16,72),(16,88),(32,72),(32,101),(0,101)],fill=5)
+    d.line((0,155,239,155),fill=4)
+    cols=[NAVY,PANEL,TEXT,NAVY,RAISED,BORDER,GREEN,SUBTEXT,BLUE,
+          CYAN,PANEL,TEXT,BORDER,BLUE,PANEL,BORDER]
+    tiles=[Image.new('P',(8,8),0) for _ in range(44)]
+    for i,c in [(11,3),(17,1),(23,3),(43,4)]: tiles[i]=Image.new('P',(8,8),c)
+    ids={tiles[i].tobytes():i for i in [0,11,17,23,43]};tm=[]
+    for y in range(32):
+        for x in range(32):
+            tile=im.crop((8*x,8*y,8*x+8,8*y+8));key=tile.tobytes()
+            if key not in ids: ids[key]=len(tiles);tiles.append(tile)
+            tm.append(ids[key])
+    assert len(tiles)<320, 'Bag graphics would overlap BG2 tilemap'
+    atlas=Image.new('P',(128,((len(tiles)+15)//16)*8),0)
+    for i,tile in enumerate(tiles):atlas.paste(tile,(i%16*8,i//16*8))
+    save(OUT/'bag_background.png',atlas,cols)
+    (OUT/'bag_background.bin').write_bytes(struct.pack('<1024H',*tm))
+    text=[NAVY,TEXT,TEXT,PANEL,CYAN,WARNING,SUBTEXT,GREEN,
+          BLUE,CYAN,PANEL,BLUE,SUBTEXT,BLUE,WARNING,SUBTEXT]
+    (OUT/'bag.pal').write_text('JASC-PAL\n0100\n32\n'+'\n'.join('%d %d %d'%c for c in cols+text)+'\n',newline='\n')
+
+def storage_shell():
+    # Keep every controller-addressed tile and glyph at its original index.
+    # The source preview uses two palette banks; hardware pixels use the low nibble.
+    im=Image.open(ROOT/'graphics/pokemon_storage/menu.png').point(lambda p:p&15)
+    colors=[NAVY,NAVY,BORDER,BORDER,NAVY,BLUE,SUBTEXT,NAVY,PANEL,BLUE,BLUE,
+            PANEL,PANEL,RAISED,TEXT,CYAN]
+    corner=Image.new('P',(8,8),1);d=ImageDraw.Draw(corner)
+    d.polygon([(4,0),(7,0),(7,7),(0,7),(0,4)],fill=5)
+    d.polygon([(5,2),(7,2),(7,7),(2,7),(2,5)],fill=12)
+    edge=Image.new('P',(8,8),12);d=ImageDraw.Draw(edge)
+    d.line((0,0,7,0),fill=1);d.line((0,1,7,1),fill=5)
+    for tile,img in [(11,corner),(12,edge),(13,corner.transpose(Image.Transpose.FLIP_LEFT_RIGHT)),
+                     (28,Image.new('P',(8,8),12)),(29,Image.new('P',(8,8),12))]:
+        im.paste(img,(tile%16*8,tile//16*8))
+    save(OUT/'storage_menu.png',im,colors)
+    palette(OUT/'storage_interface.pal',colors)
+    gray=colors.copy();gray[5]=BORDER;gray[14]=SUBTEXT
+    palette(OUT/'storage_inactive.pal',gray)
+    scroll=[NAVY,PANEL,TEXT,PANEL,BLUE,CYAN,WARNING,WARNING,NAVY,PANEL,NAVY]+[(0,0,0)]*5
+    palette(OUT/'storage_canvas.pal',scroll)
+    text=[NAVY,PANEL,TEXT,PANEL]+[(0,0,0)]*6+[PANEL,TEXT,BORDER,BLUE,PANEL,BORDER]
+    palette(OUT/'storage_text.pal',text)
+    party=[NAVY,PANEL,BORDER,NAVY,BLUE,RAISED,SUBTEXT,BLUE,TEXT,
+           TEXT,CYAN,RAISED,BLUE,NAVY,BLUE,NAVY]
+    palette(OUT/'storage_party.pal',party)
+
+def summary_panels():
+    # Preserve the original 240 dynamic tiles: pagination, status, EXP, move
+    # details and IV/EV labels are addressed by the controller at fixed IDs.
+    base=Image.open(ROOT/'graphics/summary_screen/tiles.png')
+    original_palette=base.getpalette()
+    colors=[]
+    for bank,accent in enumerate([BLUE,BLUE,BLUE,BLUE,BLUE,BLUE]):
+        cols=[tuple(original_palette[i:i+3]) for i in range(bank*48,(bank+1)*48,3)]
+        cols[0]=NAVY
+        cols[1:7]=[BORDER,PANEL,NAVY,RAISED,PANEL,PANEL]
+        cols[7:16]=[accent,accent,accent,accent,accent,PANEL,BORDER,SUBTEXT,NAVY]
+        if bank==4: # Pagination symbols retain their contrast roles.
+            cols[1:10]=[BLUE,NAVY,NAVY,CYAN,CYAN,NAVY,NAVY,NAVY,NAVY]
+        colors.extend(cols)
+    text_colors=[NAVY,TEXT,PANEL,TEXT,PANEL,WARNING,PANEL,CYAN,PANEL,WARNING,PANEL,
+                 CYAN,PANEL,WARNING,PANEL,TEXT]
+    colors.extend(text_colors)
+    colors.extend(text_colors)
+    pp_colors=text_colors.copy();pp_colors[3]=AMBER;pp_colors[7]=SUBTEXT
+    palette(OUT/'summary_pp.pal',pp_colors)
+    palette(OUT/'summary.pal',colors)
+    extra=[];ids={}
+    page_banks={'info':0,'info_egg':0,'skills':2,'battle_moves':3,'contest_moves':1}
+    for name,bank in page_banks.items():
+        raw=(ROOT/f'graphics/summary_screen/page_{name}.bin').read_bytes()
+        tm=list(struct.unpack('<1024H',raw));old=tm.copy()
+        canvas=Image.new('P',(256,160),3);d=ImageDraw.Draw(canvas)
+        d.rectangle((0,0,239,159),fill=0)
+        d.line((0,15,239,15),fill=7,width=2)
+        d.polygon([(0,16),(75,16),(79,20),(79,159),(0,159)],fill=0)
+        d.polygon([(4,19),(71,19),(75,23),(75,153),(4,153)],fill=2)
+        d.rectangle((0,18,2,159),fill=7)
+        d.line((80,16,80,159),fill=1)
+        headers=[16,64,104] if name.startswith('info') else ([16,48,104] if name=='skills' else [16,112])
+        for y in headers:
+            bottom=(63 if y==16 else 103 if y==64 else 159) if name.startswith('info') else (47 if y==16 else 103 if y==48 else 159)
+            if 'moves' in name:bottom=111 if y==16 else 159
+            d.polygon([(84,y),(235,y),(239,y+4),(239,bottom),(83,bottom),(83,y+1)],fill=1)
+            d.rectangle((85,y+16,237,bottom-1),fill=2)
+            d.rectangle((84,y,238,y+15),fill=7)
+        for y in range(20):
+            for x in range(30):
+                # The native move pages also contain an EFFECT bitmap in
+                # the left footer. Clear those legacy heading rows while
+                # retaining the portrait and other controller-owned tiles.
+                replace_move_heading = 'moves' in name and x < 10 and y in (13, 14)
+                if not name.startswith('info') and (y<2 or (x<10 and not replace_move_heading)):continue
+                tile=canvas.crop((x*8,y*8,x*8+8,y*8+8));key=tile.tobytes()
+                if key not in ids:ids[key]=240+len(extra);extra.append(tile)
+                tm[y*32+x]=ids[key]|bank<<12
+        # Headers are real BG0 windows. No bitmap-label rows sit beneath content.
+        if name.startswith('info'):
+            # DrawPagination updates tile numbers while retaining the map's
+            # palette bits. Its four 16x16 widgets must stay in bank 4.
+            for y in range(2):
+                for x in range(11,19):tm[y*32+x]=(tm[y*32+x]&0x0fff)|0x4000
+        (OUT/f'summary_{name}.bin').write_bytes(struct.pack('<1024H',*tm))
+    count=240+len(extra)
+    assert ((count+15)//16)*16 < 576, 'Summary atlas would overlap BG screenblocks'
+    for source,target in [('tiles','summary_tiles'),('iv_ev_tiles','summary_iv_ev_tiles')]:
+        original=Image.open(ROOT/f'graphics/summary_screen/{source}.png').point(lambda p:p&15)
+        atlas=Image.new('P',(128,((count+15)//16)*8),0);atlas.paste(original,(0,0))
+        for i,tile in enumerate(extra,240):atlas.paste(tile,(i%16*8,i//16*8))
+        save(OUT/f'{target}.png',atlas,colors[:16])
+
+def main():
+    frames=OUT/'frames';frames.mkdir(parents=True,exist_ok=True)
+    colors=[NAVY,PANEL,TEXT,PANEL,CYAN,PANEL,GREEN,PANEL,
+            BLUE,PANEL,PANEL,TEXT,BORDER,BLUE,PANEL,BORDER]
+    for i in range(1,21):
+        cols=colors.copy();cols[13]=[BLUE,CYAN,BORDER,BLUE,RAISED][(i-1)%5]
+        save(frames/f'{i}.png',frame(cols[13]),cols)
+    # The standard frame is often loaded with the standard text palette rather
+    # than the frame's own palette. Its indices must use the shared roles.
+    std=frame(BLUE)
+    save(frames/'std.png',std,colors)
+    palette(frames/'std.pal',colors)
+    palette(frames/'dexnav_pal.pal',colors)
+    for name in ['message_box','signpost']:
+        original=Image.open(ROOT/f'graphics/text_window/{name}.png')
+        # Keep all 14/5 tile masks and their order for message/sign renderers.
+        remap={11:15,12:14,13:13,14:15} if name=='message_box' else {11:15,15:13}
+        im=original.point(lambda p:remap.get(p,p))
+        save(frames/f'{name}.png',im,colors)
+    for i in range(1,5):
+        original=ROOT/f'graphics/text_window/text_pal{i}.pal'
+        cols=[tuple(map(int,l.split())) for l in original.read_text().splitlines()[3:]]
+        cols[1:4]=[PANEL,TEXT,PANEL]
+        cols[10:16]=colors[10:16]
+        palette(frames/f'text_pal{i}.pal',cols)
+
+    # Quiet navy canvas and horizontal rails; no concept-board proportions.
+    im=Image.new('P',(256,256),0);d=ImageDraw.Draw(im)
+    d.rectangle((0,0,239,2),fill=5)
+    d.rectangle((0,7,239,8),fill=4)
+    d.ellipse((170,100,230,160),outline=3,width=3)
+    d.line((172,130,228,130),fill=3,width=3)
+    d.ellipse((192,122,208,138),fill=0,outline=3,width=3)
+    cols=[NAVY,PANEL,NAVY,RAISED,BORDER,BLUE]+[(0,0,0)]*10
+    tiles=[];ids={};tilemap=[]
+    for y in range(32):
+        for x in range(32):
+            tile=im.crop((x*8,y*8,x*8+8,y*8+8));key=tile.tobytes()
+            if key not in ids:ids[key]=len(tiles);tiles.append(tile)
+            tilemap.append(ids[key])
+    assert len(tiles)<224, 'BG tiles overlap main-menu BG map'
+    atlas=Image.new('P',(128,((len(tiles)+15)//16)*8),1)
+    for i,tile in enumerate(tiles):atlas.paste(tile,((i%16)*8,(i//16)*8))
+    save(OUT/'main_background.png',atlas,cols)
+    palette(OUT/'main_background.pal',cols)
+    (OUT/'main_background.bin').write_bytes(struct.pack('<1024H',*tilemap))
+    text=[PANEL,TEXT,TEXT,PANEL,CYAN,PANEL,GREEN,PANEL,BLUE,PANEL,
+          PANEL,TEXT,PANEL,BLUE,NAVY,BORDER]
+    palette(OUT/'main_text.pal',text)
+    option=[NAVY,PANEL,TEXT,PANEL,CYAN,PANEL,SUBTEXT,PANEL,NAVY,BLUE]+[(0,0,0)]*6
+    palette(OUT/'options_text.pal',option)
+    bag_background()
+    storage_shell()
+    summary_panels()
+    secondary_screens(ROOT, OUT, palette)
+    party_colors=[NAVY,PANEL,NAVY,TEXT,NAVY,CYAN,BORDER,
+                  PANEL,PANEL,GREEN,(112,232,152),BLUE,CYAN,WARNING,SUBTEXT,TEXT]
+    for hide_hp in [False, True]:
+        card=Image.new('P',(112,32),0);cd=ImageDraw.Draw(card)
+        cd.polygon([(4,0),(107,0),(111,4),(111,27),(107,31),(0,31),(0,4)],fill=4)
+        cd.polygon([(4,1),(107,1),(110,4),(110,27),(106,30),(1,30),(1,4)],fill=1)
+        cd.line((5,1,106,1),fill=5)
+        cd.line((1,5,1,29),fill=5)
+        if not hide_hp:
+            cd.rectangle((31,24,80,28),fill=4)
+        save(OUT/('party_card_no_hp.png' if hide_hp else 'party_card.png'),card,party_colors)
+    print(f'Generated FireRed shared frames and main-menu background: {len(tiles)} tiles')
+
+if __name__=='__main__':main()

@@ -171,15 +171,24 @@ static void LoadMonIconGfx(void);
 static const u32 sTrainerCardStickers_Gfx[]      = INCGFX_U32("graphics/trainer_card/frlg/stickers.png", ".4bpp.smol");
 static const u16 sUnused_Pal[]                   = INCGFX_U16("graphics/trainer_card/unused.pal", ".gbapal");
 static const u16 sHoennTrainerCardBronze_Pal[]   = INCGFX_U16("graphics/trainer_card/bronze.pal", ".gbapal");
+#ifdef FIRERED
+static const u16 sKantoTrainerCardGreen_Pal[]    = INCGFX_U16("graphics/ui/firered/trainer_green.pal", ".gbapal");
+static const u16 sKantoTrainerCardBronze_Pal[]   = INCGFX_U16("graphics/ui/firered/trainer_bronze.pal", ".gbapal");
+static const u16 sKantoTrainerCardSilver_Pal[]   = INCGFX_U16("graphics/ui/firered/trainer_silver.pal", ".gbapal");
+static const u16 sKantoTrainerCardGold_Pal[]     = INCGFX_U16("graphics/ui/firered/trainer_gold.pal", ".gbapal");
+static const u16 sKantoTrainerCardFemaleBg_Pal[] = INCGFX_U16("graphics/ui/firered/trainer_female.pal", ".gbapal");
+static const u16 sFireRedTrainerCardText_Pal[]  = INCGFX_U16("graphics/ui/firered/trainer_text.pal", ".gbapal");
+#else
 static const u16 sKantoTrainerCardGreen_Pal[]    = INCGFX_U16("graphics/trainer_card/frlg/green.pal", ".gbapal");
-static const u16 sHoennTrainerCardCopper_Pal[]   = INCGFX_U16("graphics/trainer_card/copper.pal", ".gbapal");
 static const u16 sKantoTrainerCardBronze_Pal[]   = INCGFX_U16("graphics/trainer_card/frlg/bronze.pal", ".gbapal");
-static const u16 sHoennTrainerCardSilver_Pal[]   = INCGFX_U16("graphics/trainer_card/silver.pal", ".gbapal");
 static const u16 sKantoTrainerCardSilver_Pal[]   = INCGFX_U16("graphics/trainer_card/frlg/silver.pal", ".gbapal");
-static const u16 sHoennTrainerCardGold_Pal[]     = INCGFX_U16("graphics/trainer_card/gold.pal", ".gbapal");
 static const u16 sKantoTrainerCardGold_Pal[]     = INCGFX_U16("graphics/trainer_card/frlg/gold.pal", ".gbapal");
-static const u16 sHoennTrainerCardFemaleBg_Pal[] = INCGFX_U16("graphics/trainer_card/female_bg.pal", ".gbapal");
 static const u16 sKantoTrainerCardFemaleBg_Pal[] = INCGFX_U16("graphics/trainer_card/frlg/female_bg.pal", ".gbapal");
+#endif
+static const u16 sHoennTrainerCardCopper_Pal[]   = INCGFX_U16("graphics/trainer_card/copper.pal", ".gbapal");
+static const u16 sHoennTrainerCardSilver_Pal[]   = INCGFX_U16("graphics/trainer_card/silver.pal", ".gbapal");
+static const u16 sHoennTrainerCardGold_Pal[]     = INCGFX_U16("graphics/trainer_card/gold.pal", ".gbapal");
+static const u16 sHoennTrainerCardFemaleBg_Pal[] = INCGFX_U16("graphics/trainer_card/female_bg.pal", ".gbapal");
 static const u16 sHoennTrainerCardBadges_Pal[]   = INCGFX_U16("graphics/trainer_card/badges.png", ".gbapal");
 static const u16 sKantoTrainerCardBadges_Pal[]   = INCGFX_U16("graphics/trainer_card/frlg/badges.png", ".gbapal");
 static const u16 sTrainerCardStar_Pal[]          = INCGFX_U16("graphics/trainer_card/star.pal", ".gbapal");
@@ -915,6 +924,9 @@ static void InitBgsAndWindows(void)
     InitWindows(sTrainerCardWindowTemplates);
     DeactivateAllTextPrinters();
     LoadMessageBoxAndBorderGfx();
+#ifdef FIRERED
+    LoadPalette(sFireRedTrainerCardText_Pal, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+#endif
 }
 
 static void SetTrainerCardCb2(void)

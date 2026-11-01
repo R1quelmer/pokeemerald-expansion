@@ -480,6 +480,15 @@ static void RemoveExtraStartMenuWindows(void)
     }
 }
 
+static u8 StartMenuActionsTop(void)
+{
+#ifdef FIRERED
+    if (sNumStartMenuActions <= 7)
+        return 17;
+#endif
+    return 9;
+}
+
 static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
 {
     s8 index = *pIndex;
@@ -488,12 +497,12 @@ static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
     {
         if (sStartMenuItems[sCurrentStartMenuActions[index]].func.u8_void == StartMenuPlayerNameCallback)
         {
-            PrintPlayerNameOnWindow(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + 9);
+            PrintPlayerNameOnWindow(GetStartMenuWindowId(), sStartMenuItems[sCurrentStartMenuActions[index]].text, 8, (index << 4) + StartMenuActionsTop());
         }
         else
         {
             StringExpandPlaceholders(gStringVar4, sStartMenuItems[sCurrentStartMenuActions[index]].text);
-            AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + 9, TEXT_SKIP_DRAW, NULL);
+            AddTextPrinterParameterized(GetStartMenuWindowId(), FONT_NORMAL, gStringVar4, 8, (index << 4) + StartMenuActionsTop(), TEXT_SKIP_DRAW, NULL);
         }
 
         index++;
@@ -527,6 +536,16 @@ static bool32 InitStartMenuStep(void)
     case 2:
         LoadMessageBoxAndBorderGfx();
         DrawStdWindowFrame(AddStartMenuWindow(sNumStartMenuActions), FALSE);
+#ifdef FIRERED
+        if (sNumStartMenuActions <= 7)
+        {
+            static const u8 colors[] = {14, 2, 14};
+            u8 window = GetStartMenuWindowId();
+            FillWindowPixelRect(window, PIXEL_FILL(14), 0, 0, 72, 14);
+            FillWindowPixelRect(window, PIXEL_FILL(4), 0, 0, 3, 14);
+            AddTextPrinterParameterized3(window, FONT_SMALL, 8, 1, colors, TEXT_SKIP_DRAW, COMPOUND_STRING("MENU"));
+        }
+#endif
         sInitStartMenuData[1] = 0;
         sInitStartMenuData[0]++;
         break;
@@ -542,7 +561,7 @@ static bool32 InitStartMenuStep(void)
             sInitStartMenuData[0]++;
         break;
     case 5:
-        sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, 9, 16, sNumStartMenuActions, sStartMenuCursorPos);
+        sStartMenuCursorPos = InitMenuNormal(GetStartMenuWindowId(), FONT_NORMAL, 0, StartMenuActionsTop(), 16, sNumStartMenuActions, sStartMenuCursorPos);
         CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_MAP);
         return TRUE;
     }

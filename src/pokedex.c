@@ -613,9 +613,16 @@ static const struct CompressedSpriteSheet sInterfaceSpriteSheet[] =
     {0}
 };
 
+#ifdef FIRERED
+static const u16 sFireRedDexInterface_Pal[] = INCGFX_U16("graphics/ui/firered/dex_interface.pal", ".gbapal");
+#endif
 static const struct SpritePalette sInterfaceSpritePalette[] =
 {
+#ifdef FIRERED
+    {sFireRedDexInterface_Pal, TAG_DEX_INTERFACE},
+#else
     {gPokedexBgHoenn_Pal, TAG_DEX_INTERFACE},
+#endif
     {0}
 };
 
@@ -3744,10 +3751,14 @@ static void LoadPlayArrowPalette(bool8 cryPlaying)
 
     u16 color;
 
+#ifdef FIRERED
+    color = cryPlaying ? RGB(8, 24, 30) : RGB(5, 14, 23);
+#else
     if (cryPlaying)
         color = RGB(18, 28, 0);
     else
         color = RGB(15, 21, 0);
+#endif
     LoadPalette(&color, BG_PLTT_ID(5) + 13, PLTT_SIZEOF(1));
 }
 

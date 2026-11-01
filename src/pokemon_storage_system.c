@@ -932,7 +932,11 @@ static const union AffineAnimCmd *const sAffineAnims_ChooseBoxMenu[] =
 static const u8 sChooseBoxMenu_TextColors[] = {TEXT_COLOR_RED, TEXT_DYNAMIC_COLOR_6, TEXT_DYNAMIC_COLOR_5};
 static const u8 sText_OutOf30[] = _("/30");
 
+#ifdef FIRERED
+static const u16 sChooseBoxMenu_Pal[]        = INCGFX_U16("graphics/ui/firered/storage_popup.pal", ".gbapal");
+#else
 static const u16 sChooseBoxMenu_Pal[]        = INCGFX_U16("graphics/pokemon_storage/box_selection_popup.pal", ".gbapal");
+#endif
 static const u8 sChooseBoxMenuCenter_Gfx[]   = INCGFX_U8("graphics/pokemon_storage/box_selection_popup_center.png", ".4bpp");
 static const u8 sChooseBoxMenuSides_Gfx[]    = INCGFX_U8("graphics/pokemon_storage/box_selection_popup_sides.png", ".4bpp");
 static const u32 sScrollingBg_Gfx[]          = INCGFX_U32("graphics/pokemon_storage/scrolling_bg.png", ".4bpp.smol");
@@ -941,17 +945,28 @@ static const u16 sDisplayMenu_Pal[]          = INCGFX_U16("graphics/pokemon_stor
 static const u32 sDisplayMenu_Tilemap[]      = INCGFX_U32("graphics/pokemon_storage/display_menu.bin", ".smolTM");
 static const u16 sPkmnData_Tilemap[]         = INCBIN_U16("graphics/pokemon_storage/pkmn_data.bin");
 // sInterface_Pal - parts of the display frame, "PkmnData"'s normal color, Close Box
+#ifdef FIRERED
+static const u16 sInterface_Pal[] = INCGFX_U16("graphics/ui/firered/storage_interface.pal", ".gbapal");
+static const u16 sPkmnDataGray_Pal[] = INCGFX_U16("graphics/ui/firered/storage_inactive.pal", ".gbapal");
+static const u16 sScrollingBg_Pal[] = INCGFX_U16("graphics/ui/firered/storage_canvas.pal", ".gbapal");
+static const u16 sScrollingBgMoveItems_Pal[] = INCGFX_U16("graphics/ui/firered/storage_canvas.pal", ".gbapal");
+#else
 static const u16 sInterface_Pal[]            = INCGFX_U16("graphics/pokemon_storage/interface.pal", ".gbapal");
 static const u16 sPkmnDataGray_Pal[]         = INCGFX_U16("graphics/pokemon_storage/pkmn_data_gray.pal", ".gbapal");
 static const u16 sScrollingBg_Pal[]          = INCGFX_U16("graphics/pokemon_storage/scrolling_bg.pal", ".gbapal");
 static const u16 sScrollingBgMoveItems_Pal[] = INCGFX_U16("graphics/pokemon_storage/scrolling_bg_move_items.pal", ".gbapal");
+#endif
 static const u16 sCloseBoxButton_Tilemap[]   = INCBIN_U16("graphics/pokemon_storage/close_box_button.bin");
 static const u16 sPartySlotFilled_Tilemap[]  = INCBIN_U16("graphics/pokemon_storage/party_slot_filled.bin");
 static const u16 sPartySlotEmpty_Tilemap[]   = INCBIN_U16("graphics/pokemon_storage/party_slot_empty.bin");
 static const u16 sWaveform_Pal[]             = INCGFX_U16("graphics/pokemon_storage/waveform.png", ".gbapal");
 static const u32 sWaveform_Gfx[]             = INCGFX_U32("graphics/pokemon_storage/waveform.png", ".4bpp");
 static const u16 sUnused_Pal[]               = INCGFX_U16("graphics/pokemon_storage/unused.pal", ".gbapal");
+#ifdef FIRERED
+static const u16 sTextWindows_Pal[] = INCGFX_U16("graphics/ui/firered/storage_text.pal", ".gbapal");
+#else
 static const u16 sTextWindows_Pal[]          = INCGFX_U16("graphics/pokemon_storage/text_windows.pal", ".gbapal");
+#endif
 
 static const struct WindowTemplate sWindowTemplates[] =
 {
@@ -1732,8 +1747,12 @@ void ResetPokemonStorageSystem(void)
 
 static void LoadChooseBoxMenuGfx(struct ChooseBoxMenu *menu, u16 tileTag, u16 palTag, u8 subpriority, bool32 loadPal)
 {
-    // Because loadPal is always false, the below palette is never used.
-    // The Choose Box menu instead uses the palette indicated by palTag, which is always PALTAG_MISC_1 (sHandCursor_Pal)
+    // Legacy callers share the hand palette. FireRed owns a separate bank so
+    // the popup can be navy without recoloring the hand or its text glyphs.
+#ifdef FIRERED
+    palTag = 0xD7F0;
+    loadPal = TRUE;
+#endif
     struct SpritePalette palette =
     {
         sChooseBoxMenu_Pal, palTag
@@ -1745,7 +1764,7 @@ static void LoadChooseBoxMenuGfx(struct ChooseBoxMenu *menu, u16 tileTag, u16 pa
         {}
     };
 
-    if (loadPal) // Always false
+    if (loadPal)
         LoadSpritePalette(&palette);
 
     LoadSpriteSheets(sheets);
@@ -1992,6 +2011,17 @@ static void EnterPokeStorage(u8 boxOption)
         SetMainCallback2(CB2_PokeStorage);
     }
 }
+
+#if defined(FIRERED) && defined(VISUAL_QA)
+void FireRedVisualQA_OpenStorage(void)
+{
+    EnterPokeStorage(OPTION_MOVE_MONS);
+}
+void FireRedVisualQA_OpenStorageItems(void)
+{
+    EnterPokeStorage(OPTION_MOVE_ITEMS);
+}
+#endif
 
 static void CB2_ReturnToPokeStorage(void)
 {
@@ -3895,7 +3925,11 @@ static void CreateMarkingComboSprite(void)
     sStorage->markingComboSprite->oam.priority = 1;
     sStorage->markingComboSprite->subpriority = 1;
     sStorage->markingComboSprite->x = 40;
+#ifdef FIRERED
+    sStorage->markingComboSprite->y = 148;
+#else
     sStorage->markingComboSprite->y = 150;
+#endif
     sStorage->markingComboTilesPtr = (void *) OBJ_VRAM0 + 32 * GetSpriteTileStartByTag(GFXTAG_MARKING_COMBO);
 }
 
@@ -4012,20 +4046,27 @@ static void LoadDisplayMonGfx(enum Species species, u32 pid, bool32 isEgg)
 
 static void PrintDisplayMonInfo(void)
 {
+#ifdef FIRERED
+    const u8 smallFont = FONT_SMALL;
+    const u8 speciesY = 16, levelY = 28, itemY = 40;
+#else
+    const u8 smallFont = FONT_SHORT;
+    const u8 speciesY = 15, levelY = 29, itemY = 43;
+#endif
     FillWindowPixelBuffer(WIN_DISPLAY_INFO, PIXEL_FILL(1));
     if (sStorage->boxOption != OPTION_MOVE_ITEMS)
     {
         AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonNameText, FONT_NORMAL, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 6), sStorage->displayMonNameText, 6, 0, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonNameText, FONT_SHORT, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 12), sStorage->displayMonSpeciesName, 6, 15, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, 29, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonItemName, FONT_SMALL, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 6), sStorage->displayMonItemName, 6, 43, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonSpeciesName, smallFont, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 12), sStorage->displayMonSpeciesName, 6, speciesY, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, smallFont, sStorage->displayMonGenderLvlText, 10, levelY, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonItemName, FONT_SMALL, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 6), sStorage->displayMonItemName, 6, itemY, TEXT_SKIP_DRAW, NULL);
     }
     else
     {
         AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonItemName, FONT_SMALL, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 6), sStorage->displayMonItemName, 6, 0, TEXT_SKIP_DRAW, NULL);
         AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonNameText, FONT_NORMAL, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 6), sStorage->displayMonNameText, 6, 13, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonSpeciesName, FONT_SHORT, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 12), sStorage->displayMonSpeciesName, 6, 28, TEXT_SKIP_DRAW, NULL);
-        AddTextPrinterParameterized(WIN_DISPLAY_INFO, FONT_SHORT, sStorage->displayMonGenderLvlText, 10, 42, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, GetFontIdToFit(sStorage->displayMonSpeciesName, smallFont, 0, WindowWidthPx(WIN_DISPLAY_INFO) - 12), sStorage->displayMonSpeciesName, 6, 28, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized(WIN_DISPLAY_INFO, smallFont, sStorage->displayMonGenderLvlText, 10, itemY - 1, TEXT_SKIP_DRAW, NULL);
     }
 
     CopyWindowToVram(WIN_DISPLAY_INFO, COPYWIN_GFX);

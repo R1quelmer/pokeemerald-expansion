@@ -92,3 +92,5 @@ Text_RestoredPkmnToFullHealth_Frlg::
 	.string "Thank you for waiting.\n"
 	.string "We've restored your POKéMON to\l"
 	.string "full health.$"
+
+	.include "data/scripts/custom_frlg_starters.inc"

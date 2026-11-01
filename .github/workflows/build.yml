@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - upcoming
+      - feat/firered-hack-base
   pull_request:
 
 env:
