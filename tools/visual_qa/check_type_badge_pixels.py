@@ -59,10 +59,11 @@ for scene, battler in [(51, 0), (56, 1)]:
     area = screenshot(scene).crop((x, y + 7, x + 8, y + 14))
     assert set(area.getdata()) <= {(16, 33, 57), (24, 49, 82)}, f'stale second badge in scene {scene}'
 
-# Same native PSN tiles before/after HP animations, despite different box layouts.
+# Same PSN glyph pixels before/after HP animations. The final two background
+# columns meet different native HP-bar outlines in single and double layouts.
 dx, dy = offsets[53, 0]
-static_status = screenshot(53).crop((151 + dx, 76 + dy, 175 + dx, 84 + dy))
+static_status = screenshot(53).crop((151 + dx, 76 + dy, 173 + dx, 84 + dy))
 dx, dy = offsets[61, 0]
-animated_status = screenshot(61).crop((150 + dx, 96 + dy, 174 + dx, 104 + dy))
+animated_status = screenshot(61).crop((150 + dx, 96 + dy, 172 + dx, 104 + dy))
 assert static_status.tobytes() == animated_status.tobytes(), 'HP redraw erased or covered PSN'
 print('Rendered type glyphs, colors, order, removed badges and status after HP animation passed.')
