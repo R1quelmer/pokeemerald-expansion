@@ -46,6 +46,7 @@ def generate(root, out, write_palette):
     write_palette(out / 'move_relearner.pal', learn)
     popup = read('graphics/pokemon_storage/box_selection_popup.pal')
     popup[8:12] = [PANEL, RAISED, BLUE, BORDER]
+    popup[4], popup[14], popup[15] = PANEL, PANEL, TEXT
     write_palette(out / 'storage_popup.pal', popup)
 
     card = [NAVY, PANEL, RAISED, PANEL, BORDER, TEXT, BORDER, NAVY,
@@ -142,5 +143,5 @@ def generate(root, out, write_palette):
         tiles = list(struct.unpack('<80H', data))
         # Remove the legacy bitmap heading now owned by a BG0 window.
         # Preserved tile 0x34 is solid panel color 12.
-        tiles[10:20] = [(bank << 12) | 0x34] * 10
+        tiles[:20] = [(bank << 12) | 0x34] * 20
         (out / f'summary_effect_{source}.bin').write_bytes(struct.pack('<80H', *tiles))

@@ -1747,8 +1747,12 @@ void ResetPokemonStorageSystem(void)
 
 static void LoadChooseBoxMenuGfx(struct ChooseBoxMenu *menu, u16 tileTag, u16 palTag, u8 subpriority, bool32 loadPal)
 {
-    // Because loadPal is always false, the below palette is never used.
-    // The Choose Box menu instead uses the palette indicated by palTag, which is always PALTAG_MISC_1 (sHandCursor_Pal)
+    // Legacy callers share the hand palette. FireRed owns a separate bank so
+    // the popup can be navy without recoloring the hand or its text glyphs.
+#ifdef FIRERED
+    palTag = 0xD7F0;
+    loadPal = TRUE;
+#endif
     struct SpritePalette palette =
     {
         sChooseBoxMenu_Pal, palTag
@@ -1760,7 +1764,7 @@ static void LoadChooseBoxMenuGfx(struct ChooseBoxMenu *menu, u16 tileTag, u16 pa
         {}
     };
 
-    if (loadPal) // Always false
+    if (loadPal)
         LoadSpritePalette(&palette);
 
     LoadSpriteSheets(sheets);
