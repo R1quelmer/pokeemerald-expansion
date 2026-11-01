@@ -351,7 +351,11 @@ static const struct Subsprite sHealthBar_Subsprites_Opponent[] =
         .priority = 1
     },
     {
+#ifdef FIRERED
+        .x = -24,
+#else
         .x = -32,
+#endif
         .y = 0,
         .shape = SPRITE_SHAPE(8x8),
         .size = SPRITE_SIZE(8x8),
@@ -1822,17 +1826,38 @@ void UpdateNickInHealthbox(u8 healthboxSpriteId, struct Pokemon *mon)
     gSprites[healthboxSpriteId].data[1] = healthboxSpriteId2;
     gSprites[healthboxSpriteId2].data[1] = SPRITE_NONE;
 
-    u32 fontId = GetFontIdToFit(gDisplayedStringBattle, FONT_SMALL, 0, 55);
+    u32 nameInset = 0;
+#ifdef FIRERED
+    nameInset = 8; // Reserve the inner type-glyph rail.
+#endif
+    u32 fontId = GetFontIdToFit(gDisplayedStringBattle, FONT_SMALL, 0, 55 - nameInset);
+#ifdef FIRERED
+    if (GetStringWidth(fontId, gDisplayedStringBattle, 0) > 55 - nameInset)
+    {
+        // The narrowest native font cannot fit every 12-character nickname.
+        // Use a visible ellipsis, retaining gender, rather than drawing on Lv.
+        u8 suffix[32];
+        u32 length = StringLength(nickname);
+        StringCopy(suffix, ptr);
+        do
+        {
+            length--;
+            StringCopyN(gDisplayedStringBattle, nickname, length);
+            gDisplayedStringBattle[length] = CHAR_ELLIPSIS;
+            StringCopy(gDisplayedStringBattle + length + 1, suffix);
+        } while (length != 0 && GetStringWidth(fontId, gDisplayedStringBattle, 0) > 55 - nameInset);
+    }
+#endif
 
     if (IsOnPlayerSide(gSprites[healthboxSpriteId].data[6]))
     {
         FillSpriteRectColor(healthboxSpriteId, 16, 5, 55, 11, HEALTHBOX_BG_INDEX);
-        AddSpriteTextPrinterParameterized6(healthboxSpriteId, fontId, 16, 3, 0, 0, sHealthBoxTextColor, 0, gDisplayedStringBattle);
+        AddSpriteTextPrinterParameterized6(healthboxSpriteId, fontId, 16 + nameInset, 3, 0, 0, sHealthBoxTextColor, 0, gDisplayedStringBattle);
     }
     else
     {
         FillSpriteRectColor(healthboxSpriteId, 8, 5, 55, 11, HEALTHBOX_BG_INDEX);
-        AddSpriteTextPrinterParameterized6(healthboxSpriteId, fontId, 8, 3, 0, 0, sHealthBoxTextColor, 0, gDisplayedStringBattle);
+        AddSpriteTextPrinterParameterized6(healthboxSpriteId, fontId, 8 + nameInset, 3, 0, 0, sHealthBoxTextColor, 0, gDisplayedStringBattle);
     }
 
     gSprites[healthboxSpriteId].data[1] = savedValue1;
@@ -1898,6 +1923,9 @@ static void UpdateStatusIconInHealthbox(u8 healthboxSpriteId)
             tileNumAdder = 0x11;
     }
 
+#ifdef FIRERED
+    tileNumAdder++; // Status shares the 8px name inset; HP pixels stay put.
+#endif
     if (status & STATUS1_SLEEP)
     {
         statusGfxPtr = GetHealthboxElementGfxPtr(GetStatusIconForBattlerId(HEALTHBOX_GFX_STATUS_SLP_BATTLER0, battler));

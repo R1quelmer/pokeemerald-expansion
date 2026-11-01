@@ -23,16 +23,18 @@ of the old move-selection-only widget.
 ## Layout and lifecycle
 
 `CreateBattlerHealthboxSprites` creates a three-sprite badge group for each normal
-healthbox. Player badges form a short horizontal row at the upper-left corner,
-clear of the Mega/Tera trigger's slide corridor. Right-flank player badges are
-aligned to avoid the other healthbox. Opponent badges stack at the right edge;
-a third badge sits beside the lower one.
+healthbox. Badges stack in a narrow rail inside the left edge on both sides.
+The visible 8×7 glyphs occupy at most 21px vertically, fitting native Double/Multi
+boxes without touching Pokémon sprites, adjacent boxes or the Mega/Tera trigger.
 
 The group follows the actual healthbox's position, slide/bounce offsets,
-visibility and OAM priority. It uses `GetBattlerPosition`, rather than treating
-a battler ID as a screen position. Native healthbox geometry, text, HP, EXP,
-status and gimmick rendering are unchanged. Safari's non-Pokémon player box does
-not create a badge group.
+visibility and OAM priority; it never treats a battler ID as a screen position.
+The box dimensions, HP, EXP, level and gimmick positions remain native. Name and
+status move 8px right; the caught-ball marker uses the same inset when there is
+no status. The native font-fitting logic still applies. Exceptionally wide names
+that cannot fit even the narrowest font get a visible ellipsis with gender
+preserved, avoiding overlap with Lv100. The nickname data and other menus retain
+the full name. Safari's non-Pokémon player box does not create a badge group.
 
 One controller per healthbox checks the three effective types each frame. This
 bounded check avoids missing changes from less common abilities, forms or moves.
@@ -43,15 +45,17 @@ sprite resets handle the group's lifetime, like other healthbox attachments.
 
 ## Assets and resource budget
 
-- Reuses `graphics/types/battle_icons1.png`, `battle_icons2.png` and their existing
-  palettes. No new type art or 18 separate graphic/palette sets.
-- Reuses `gTypesInfo[type].useSecondTypeIconPalette` and native animation frames.
+- Derives two compact atlases from `graphics/types/battle_icons1.png` and
+  `battle_icons2.png`, retaining their existing indexed colors and type symbols.
+  `tools/generate_firered_type_badges.py` reproduces the 8×7 glyphs using nearest
+  pixel sampling. No separate graphic/palette set for each type.
+- Reuses `gTypesInfo[type].useSecondTypeIconPalette` and the existing palettes.
 - Two shared tagged OBJ palettes, independent of the battler count. No fixed
   palette-slot writes and no modification of Pokémon, HP or BG palettes.
-- Two 640-byte 4bpp sheets: **1,280 bytes / 40 OBJ tiles** total. Both source
-  sheets are 8×160, including sheet 2's blank last frame. The entire decompressed
+- Two 320-byte 4bpp sheets: **640 bytes / 20 OBJ tiles** total. Both compact
+  sheets are 8×80, including sheet 2's blank last frame. The entire decompressed
   stream is reserved to avoid writing past the allocation.
-- Three 8×16 OAM sprites per healthbox, maximum 12. The visible glyph is smaller
+- Three 8×8 OAM sprites per healthbox, maximum 12. The visible glyph is smaller
   than its OAM frame. Sprite creation/allocation failures are checked.
 - FireRed's old temporary `LoadTypeIcons` path is bypassed, preventing duplicate
   widgets and competing ownership/freeing of these shared resources.

@@ -204,16 +204,14 @@ const struct OamData sOamData_TypeIcons =
 const struct CompressedSpriteSheet sSpriteSheet_TypeIcons2 =
 {
     .data = gBattleIcons_Gfx2,
-    // Both source sheets have ten 8x16 frames, including a blank final frame
-    // in sheet 2. Reserve the entire decompressed stream, not just used types.
-    .size = IS_FRLG && GAME_VERSION == VERSION_FIRE_RED ? (8*16/2) * 10 : (8*16) * 9,
+    .size = (8*16) * 9,
     .tag = TYPE_ICON_TAG_2,
 };
 
 const struct CompressedSpriteSheet sSpriteSheet_TypeIcons1 =
 {
     .data = gBattleIcons_Gfx1,
-    .size = (8*16) * 10 / (IS_FRLG && GAME_VERSION == VERSION_FIRE_RED ? 2 : 1),
+    .size = (8*16) * 10,
     .tag = TYPE_ICON_TAG,
 };
 
@@ -268,6 +266,28 @@ static void LoadTypeSpritesAndPalettes(void)
 }
 
 #ifdef FIRERED
+static const u32 sHealthboxTypeGfx1[] = INCGFX_U32("graphics/ui/firered/battle_type_chips1.png", ".4bpp.smol");
+static const u32 sHealthboxTypeGfx2[] = INCGFX_U32("graphics/ui/firered/battle_type_chips2.png", ".4bpp.smol");
+static const struct CompressedSpriteSheet sHealthboxTypeSheets[] =
+{
+    {sHealthboxTypeGfx1, 8 * 80 / 2, TYPE_ICON_TAG},
+    {sHealthboxTypeGfx2, 8 * 80 / 2, TYPE_ICON_TAG_2},
+};
+static const struct OamData sOamData_HealthboxType =
+{
+    .shape = SPRITE_SHAPE(8x8),
+    .size = SPRITE_SIZE(8x8),
+    .priority = 1,
+};
+static const struct SpriteTemplate sHealthboxTypeTemplate =
+{
+    .tileTag = TYPE_ICON_TAG,
+    .paletteTag = TYPE_ICON_TAG,
+    .oam = &sOamData_HealthboxType,
+    .anims = gDummySpriteAnimTable,
+    .callback = SpriteCallbackDummy,
+};
+
 // Three slots are intentional: Forest's Curse/Trick-or-Treat can add a type.
 // One controller per healthbox only changes the shared atlas frame/palette
 // when the resolved defensive typing changes. No per-frame VRAM uploads.
@@ -310,26 +330,17 @@ static void SpriteCB_HealthboxTypeIcons(struct Sprite *sprite)
             if (i < count)
             {
                 u16 tag = gTypesInfo[type].useSecondTypeIconPalette ? TYPE_ICON_TAG_2 : TYPE_ICON_TAG;
-                icon->sheetTileStart = GetSpriteTileStartByTag(tag);
+                u32 frame = type == TYPE_STELLAR ? TYPE_MYSTERY - TYPE_NORMAL
+                    : gTypesInfo[type].useSecondTypeIconPalette ? type - TYPE_FIRE : type - TYPE_NORMAL;
+                icon->sheetTileStart = GetSpriteTileStartByTag(tag) + frame;
                 icon->oam.paletteNum = IndexOfSpritePaletteTag(tag);
-                StartSpriteAnim(icon, type);
+                StartSpriteAnim(icon, 0);
             }
             sprite->data[4 + i] = type;
         }
-        // Player tabs sit above the gimmick trigger's 32x16 slide corridor.
-        // Align the right-flank tabs with the first box's left edge in doubles.
-        // Opponent tabs fit in the 25px gap between stacked healthboxes.
-        if (IsOnPlayerSide(battler))
-        {
-            icon->x = healthbox->x - 38 + 9 * ((s32)i - (s32)count + 1)
-                - (GetBattlerPosition(battler) == B_POSITION_PLAYER_RIGHT ? 12 : 0);
-            icon->y = healthbox->y - 8;
-        }
-        else
-        {
-            icon->x = healthbox->x + 68 + (i == 2 ? 9 : 0);
-            icon->y = healthbox->y - 4 + (i == 0 ? 0 : 11);
-        }
+        // A 21px rail inside each box: never over Pokémon or gimmick triggers.
+        icon->x = healthbox->x + (IsOnPlayerSide(battler) ? -16 : -24);
+        icon->y = healthbox->y + (IsOnPlayerSide(battler) ? -3 : -8) + 7 * i;
         icon->x2 = healthbox->x2;
         icon->y2 = healthbox->y2;
         icon->oam.priority = healthbox->oam.priority;
@@ -340,7 +351,13 @@ static void SpriteCB_HealthboxTypeIcons(struct Sprite *sprite)
 void CreateHealthboxTypeIcons(enum BattlerId battler, u8 healthboxSpriteId)
 {
     u8 ids[3];
-    LoadTypeSpritesAndPalettes();
+    for (u32 i = 0; i < ARRAY_COUNT(sHealthboxTypeSheets); i++)
+        if (GetSpriteTileStartByTag(sHealthboxTypeSheets[i].tag) == TAG_NONE)
+            LoadCompressedSpriteSheet(&sHealthboxTypeSheets[i]);
+    if (IndexOfSpritePaletteTag(TYPE_ICON_TAG) == UCHAR_MAX)
+        LoadSpritePalette(&sTypeIconPal1);
+    if (IndexOfSpritePaletteTag(TYPE_ICON_TAG_2) == UCHAR_MAX)
+        LoadSpritePalette(&sTypeIconPal2);
     // Allocators, never fixed OBJ palette slots or hard-coded VRAM addresses.
     if (IndexOfSpritePaletteTag(TYPE_ICON_TAG) == UCHAR_MAX
         || IndexOfSpritePaletteTag(TYPE_ICON_TAG_2) == UCHAR_MAX
@@ -349,7 +366,7 @@ void CreateHealthboxTypeIcons(enum BattlerId battler, u8 healthboxSpriteId)
         return;
     for (u32 i = 0; i < ARRAY_COUNT(ids); i++)
     {
-        ids[i] = CreateSpriteAtEnd(&sSpriteTemplate_TypeIcons1, 0, 0, 0);
+        ids[i] = CreateSpriteAtEnd(&sHealthboxTypeTemplate, 0, 0, 0);
         if (ids[i] == MAX_SPRITES)
         {
             while (i != 0)
