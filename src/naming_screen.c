@@ -189,6 +189,7 @@ static const u8 sPCIconOff_Gfx[] = INCGFX_U8("graphics/naming_screen/pc_icon_off
 static const u8 sPCIconOn_Gfx[] = INCGFX_U8("graphics/naming_screen/pc_icon_on.png", ".4bpp");
 #ifdef FIRERED
 static const u16 sKeyboard_Pal[] = INCGFX_U16("graphics/ui/firered/naming_keyboard.pal", ".gbapal");
+static const u16 sNamingIcon_Pal[] = INCGFX_U16("graphics/ui/firered/naming_icon.pal", ".gbapal");
 #else
 static const u16 sKeyboard_Pal[] = INCGFX_U16("graphics/naming_screen/keyboard.pal", ".gbapal");
 #endif
@@ -2650,7 +2651,11 @@ static const struct SpriteSheet sSpriteSheets[] =
 
 static const struct SpritePalette sSpritePalettes[] =
 {
+#ifdef FIRERED
+    {sNamingIcon_Pal, PALTAG_MENU},
+#else
     {gNamingScreenMenu_Pal[0], PALTAG_MENU},
+#endif
     {gNamingScreenMenu_Pal[1], PALTAG_PAGE_SWAP_UPPER},
     {gNamingScreenMenu_Pal[2], PALTAG_PAGE_SWAP_LOWER},
     {gNamingScreenMenu_Pal[3], PALTAG_PAGE_SWAP_OTHERS},

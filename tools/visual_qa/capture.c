@@ -71,11 +71,19 @@ int main(int argc, char **argv)
                     if (age == 660 || age == 661) keys = 128;
                     if (age == 1650 || age == 1651 || age == 1900 || age == 1901) keys = 2;
                 }
-                if (scene == 38)
+                if (scene == 38 || scene == 44)
                 {
-                    if (age == 420 || age == 421 || age == 960 || age == 961) keys = 2;
-                    if (age == 600 || age == 601 || age == 1200 || age == 1201) keys = 1;
-                    if (age == 780 || age == 781 || age == 1400 || age == 1401) keys = 4;
+                    /* Naming templates intentionally ignore an existing name.
+                     * Navigate from A to W (row 3, column 3) and type the full
+                     * native limit through the real input handler. */
+                    if (age == 420 || age == 421 || age == 480 || age == 481
+                        || age == 540 || age == 541) keys = 128;
+                    if (age == 600 || age == 601 || age == 660 || age == 661
+                        || age == 720 || age == 721) keys = 16;
+                    unsigned lastCharacter = scene == 38 ? 1500 : 1260;
+                    if (age >= 840 && age <= lastCharacter + 1 && age % 60 < 2) keys = 1;
+                    if (age == 1740 || age == 1741) keys = 4;
+                    if (age == 1980 || age == 1981) keys = 2;
                 }
                 if (scene == 39)
                 {

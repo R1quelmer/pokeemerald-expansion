@@ -13,8 +13,12 @@ def generate(root, out, write_palette):
         return [tuple(p[i:i + 3]) for i in range(0, len(p), 3)]
 
     selector = png_palette('graphics/summary_screen/move_select.png')[:16]
-    selector[1:16] = [CYAN, BLUE, BORDER, CYAN, BLUE, BORDER, CYAN, BLUE,
-                     BORDER, CYAN, BLUE, BORDER, CYAN, BLUE, BORDER]
+    # The native selector uses 3 for its blue rail and 12 for its red rail.
+    # Both active rails become cyan; preserve light and shaded edge roles.
+    selector[1] = TEXT
+    selector[2] = BORDER
+    selector[3] = selector[12] = CYAN
+    selector[4] = BLUE
     write_palette(out / 'summary_selector.pal', selector)
 
     card = [NAVY, PANEL, RAISED, PANEL, BORDER, TEXT, BORDER, NAVY,
@@ -44,6 +48,8 @@ def generate(root, out, write_palette):
     naming = [NAVY, PANEL, PANEL, BORDER, BORDER, RAISED, PANEL, BLUE,
               BORDER, PANEL, NAVY, NAVY, CYAN, PANEL, PANEL, PANEL]
     write_palette(out / 'naming_menu.pal', naming)
+    write_palette(out / 'naming_icon.pal', [NAVY, TEXT, NAVY, BORDER, RAISED,
+        BLUE, CYAN, BLUE, CYAN, TEXT, NAVY, NAVY, CYAN, PANEL, PANEL, PANEL])
     keyboard = read('graphics/naming_screen/keyboard.pal')
     keyboard[:4] = [NAVY, TEXT, PANEL, BORDER]
     keyboard[13:16] = [PANEL, PANEL, PANEL]
@@ -76,8 +82,13 @@ def generate(root, out, write_palette):
         BORDER, NAVY, BORDER, NAVY, PANEL, CYAN, CYAN, RAISED, BORDER, SUBTEXT, NAVY])
     colors = read('graphics/pokedex/search_menu.pal')
     for start in range(0, len(colors), 16):
-        colors[start:start + 16] = [NAVY, PANEL, PANEL, PANEL, TEXT, BORDER, NAVY,
-            RAISED, BLUE, BORDER, CYAN, BLUE, RAISED, BORDER, CYAN, TEXT]
+        # Search highlights switch palette banks: 0 selected, 1 unselected,
+        # 2 disabled-selected, 3 disabled-unselected. Keep those states distinct.
+        bank = start // 16
+        fill, edge, ink = [(BLUE, CYAN, TEXT), (RAISED, BORDER, TEXT),
+                           (BORDER, SUBTEXT, SUBTEXT), (PANEL, BORDER, SUBTEXT)][bank]
+        colors[start:start + 16] = [NAVY, PANEL, PANEL, PANEL, ink, BORDER, NAVY,
+            RAISED, fill, BORDER, fill, BORDER, edge, BORDER, CYAN, TEXT]
     write_palette(out / 'dex_search.pal', colors)
     cry = png_palette('graphics/pokedex/cry_screen_bg.png')[:16]
     cry[:3] = [NAVY, PANEL, BORDER]
