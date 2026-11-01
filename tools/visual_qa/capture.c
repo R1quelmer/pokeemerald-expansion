@@ -140,8 +140,8 @@ int main(int argc, char **argv)
                 file->close(file);
                 uint32_t pc = 0;
                 core->readRegister(core, "r15", &pc);
-                printf("scene=%u frame=%u progress=%u callback2=%08x pc=%08x flags=%08x outcome=%u\n",
-                    scene, frame, core->busRead32(core, progressAddress),
+                printf("scene=%u frame=%u age=%u progress=%u callback2=%08x pc=%08x flags=%08x outcome=%u\n",
+                    scene, frame, readyFrame ? frame - readyFrame : 0, core->busRead32(core, progressAddress),
                     core->busRead32(core, mainAddress + 4), pc,
                     core->busRead32(core, flagsAddress), core->busRead8(core, outcomeAddress));
             }
