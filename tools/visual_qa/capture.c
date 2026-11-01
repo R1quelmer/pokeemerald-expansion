@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 44; ++scene)
+    for (unsigned scene = 0; scene <= 46; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;

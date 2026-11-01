@@ -139,7 +139,7 @@ bool8 TryInitFireRedVisualQA(void)
         SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_STATUS, &status);
         SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_HELD_ITEM, &item);
     }
-    if (scene == 32)
+    if (scene == 32 || scene == 45 || scene == 46)
     {
         const enum Species edgeSpecies[] = {SPECIES_SHEDINJA, SPECIES_MR_MIME,
             SPECIES_FARFETCHD, SPECIES_WOBBUFFET, SPECIES_FLUTTER_MANE, SPECIES_KINGAMBIT};
@@ -152,6 +152,17 @@ bool8 TryInitFireRedVisualQA(void)
         SetMonData(&gParties[B_TRAINER_PLAYER][1], MON_DATA_STATUS, &status);
         SetMonData(&gParties[B_TRAINER_PLAYER][3], MON_DATA_HP, &hp);
         SetMonData(&gParties[B_TRAINER_PLAYER][4], MON_DATA_HELD_ITEM, &item);
+        if (scene == 45)
+        {
+            gPartiesCount[B_TRAINER_PLAYER] = 2;
+            for (u32 i = 2; i < PARTY_SIZE; i++)
+                ZeroMonData(&gParties[B_TRAINER_PLAYER][i]);
+        }
+        if (scene == 46)
+        {
+            hp = 1;
+            SetMonData(&gParties[B_TRAINER_PLAYER][5], MON_DATA_HP, &hp);
+        }
     }
     if (scene == 33)
     {
@@ -200,7 +211,9 @@ bool8 TryInitFireRedVisualQA(void)
     case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 26: case 32:
         FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_SINGLE, ReturnFromVisualQA); break;
     case 24: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_DOUBLE, ReturnFromVisualQA); break;
+    case 45: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_DOUBLE, ReturnFromVisualQA); break;
     case 25: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_MULTI_FULL, ReturnFromVisualQA); break;
+    case 46: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_MULTI_FULL, ReturnFromVisualQA); break;
     case 3: ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
     case 4: case 35: case 36:
         GoToBagMenu(ITEMMENULOCATION_FIELD, POCKET_ITEMS, ReturnFromVisualQA); break;
