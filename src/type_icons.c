@@ -333,8 +333,10 @@ static void SpriteCB_HealthboxTypeIcons(struct Sprite *sprite)
                 u32 frame = type == TYPE_STELLAR ? TYPE_MYSTERY - TYPE_NORMAL
                     : gTypesInfo[type].useSecondTypeIconPalette ? type - TYPE_FIRE : type - TYPE_NORMAL;
                 icon->sheetTileStart = GetSpriteTileStartByTag(tag) + frame;
+                // The dummy animation is END-only, so it never applies a frame
+                // to OAM. Switch the actual tile along with the cached type.
+                icon->oam.tileNum = icon->sheetTileStart;
                 icon->oam.paletteNum = IndexOfSpritePaletteTag(tag);
-                StartSpriteAnim(icon, 0);
             }
             sprite->data[4 + i] = type;
         }

@@ -85,6 +85,11 @@ for each battler. `tools/visual_qa/check_type_badges.py` checks mono/dual order,
 deduplication, four battlers, and the required native mechanic transitions.
 Real screenshots still require visual inspection for layout, contrast and
 rendering defects; passing this log check alone is not visual approval.
+`check_type_badge_pixels.py` also compares actual mGBA pixels with each type's
+indexed glyph/palette on both sides, including four-battler layouts, checks
+that a removed second badge leaves a clean panel, and compares the native PSN
+tiles before/after healing and poison damage. This catches an OAM frame failing
+to update even when the cached type and palette reference are correct.
 
 Build with `make firered -j$(nproc)`. The `FireRed visual QA` workflow builds a
 separate clean `VISUAL_QA=1` cartridge and exports screenshots/logs, never the ROM.
