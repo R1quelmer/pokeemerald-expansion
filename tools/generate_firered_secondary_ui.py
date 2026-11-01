@@ -21,6 +21,26 @@ def generate(root, out, write_palette):
     selector[4] = BLUE
     write_palette(out / 'summary_selector.pal', selector)
 
+    # Preserve native doubles/multi geometry and runtime HP/gender lookups.
+    party = png_palette('graphics/party_menu/bg.png')[:176]
+    original_party = party.copy()
+    party[:16] = [NAVY, TEXT, BORDER, NAVY, CYAN, BLUE, BORDER,
+        WARNING, (184, 72, 96), WARNING, NAVY, NAVY, NAVY, NAVY, NAVY, NAVY]
+    party[16:32] = [NAVY, NAVY, BLUE, PANEL, PANEL, PANEL, NAVY, NAVY,
+        NAVY, NAVY, TEXT, PANEL, BORDER, NAVY, NAVY, BORDER]
+    party[32:48] = [NAVY, CYAN, BLUE, PANEL, PANEL, PANEL, NAVY, NAVY,
+        NAVY, NAVY, TEXT, PANEL, BORDER, NAVY, NAVY, BLUE]
+    for bank in range(3, 11):
+        start = bank * 16
+        face = RAISED if bank in (4, 7, 8) else NAVY if bank in (5, 9) else PANEL
+        party[start:start + 9] = [NAVY, BORDER, PANEL, TEXT, face, face, BORDER, face, BORDER]
+        party[start + 13] = NAVY
+    party[97], party[103], party[104] = CYAN, CYAN, BLUE
+    party[161], party[167], party[168] = BLUE, BLUE, CYAN
+    for index in [57, 58, 73, 74, 89, 90, 59, 60, 75, 76]:
+        assert party[index] == original_party[index], index
+    write_palette(out / 'party_native.pal', party)
+
     card = [NAVY, PANEL, RAISED, PANEL, BORDER, TEXT, BORDER, NAVY,
             TEXT, BORDER, BLUE, BLUE, BORDER, BORDER, PANEL, BLUE]
     for name in ['blue', 'green', 'bronze', 'silver', 'gold']:
