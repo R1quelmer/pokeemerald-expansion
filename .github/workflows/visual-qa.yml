@@ -40,6 +40,8 @@ jobs:
           test -n "$main"
           arm-none-eabi-nm -n pokefirered.elf > visual-qa/symbols.txt
           /tmp/firered-capture pokefirered.gba visual-qa "$address" "$progress" "$main" "$flags" "$outcome" "$types" | awk '/^scene=/' | tee visual-qa/capture.log
+      - name: Check current-type badge transitions from actual emulation
+        run: python3 tools/visual_qa/check_type_badges.py visual-qa/capture.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

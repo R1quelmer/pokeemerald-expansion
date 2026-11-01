@@ -131,6 +131,12 @@ static void StartTypeBadgeBattle(u8 scene)
             level, 0, OTID_STRUCT_PLAYER_ID, 31);
         SetMonMoveSlot(&gParties[trainer][1], MOVE_CELEBRATE, 0);
         gPartiesCount[trainer] = 2;
+        if (scene >= 55 && trainer != B_TRAINER_PLAYER)
+        {
+            // Keep the real opponent inert while recording one player turn.
+            u32 status = STATUS1_SLEEP;
+            SetMonData(&gParties[trainer][0], MON_DATA_STATUS, &status);
+        }
     }
     struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][0];
     SetMonData(mon, MON_DATA_HELD_ITEM, &item);

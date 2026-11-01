@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <string.h>
 
 int main(int argc, char **argv)
 {
@@ -17,6 +18,22 @@ int main(int argc, char **argv)
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
     unsigned typeStateAddress = argc == 9 ? strtoul(argv[8], NULL, 16) : 0;
+    unsigned controllers = 0, chooseActionPtr = 0, chooseMove = 0;
+    char symbolsPath[512], symbolLine[512];
+    snprintf(symbolsPath, sizeof(symbolsPath), "%s/symbols.txt", argv[2]);
+    FILE *symbols = fopen(symbolsPath, "r");
+    if (!symbols) return 8;
+    while (fgets(symbolLine, sizeof(symbolLine), symbols))
+    {
+        unsigned value;
+        char kind, name[256];
+        if (sscanf(symbolLine, "%x %c %255s", &value, &kind, name) != 3) continue;
+        if (!strcmp(name, "gBattlerControllerFuncs")) controllers = value;
+        if (!strcmp(name, "gVisualQaChooseAction")) chooseActionPtr = value;
+        if (!strcmp(name, "HandleInputChooseMove")) chooseMove = value & ~1u;
+    }
+    fclose(symbols);
+    if (!controllers || !chooseActionPtr || !chooseMove) return 8;
     for (unsigned scene = 0; scene <= 61; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
@@ -28,8 +45,10 @@ int main(int argc, char **argv)
         if (!pixels || !mCoreLoadFile(core, argv[1])) return 4;
         core->setVideoBuffer(core, pixels, 256);
         core->reset(core);
+        unsigned chooseAction = core->busRead32(core, chooseActionPtr) & ~1u;
         unsigned readyFrame = 0;
-        unsigned frameCount = scene >= 55 ? 10000 : scene >= 51 ? 4000
+        unsigned actionAge = 0, moveAge = 0, actionStarted = 0, moveChosen = 0;
+        unsigned frameCount = scene >= 55 ? 10000 : scene >= 51 ? 6000
             : scene == 10 ? 12000 : scene == 31 ? 10000 : scene == 39 ? 4800 : 2800;
         for (unsigned frame = 0; frame < frameCount; ++frame)
         {
@@ -45,11 +64,39 @@ int main(int argc, char **argv)
                 if (!readyFrame) readyFrame = frame;
                 unsigned age = frame - readyFrame;
                 unsigned keys = 0;
-                if (scene >= 55)
+                if (scene >= 51)
                 {
-                    if (age == 1500 || age == 1501 || age == 2100 || age == 2101) keys = 1;
-                    if ((scene == 55 || scene == 58 || scene == 59) && (age == 1800 || age == 1801)) keys = 8;
-                    if (age >= 5000 && age % 600 < 2) keys = 1;
+                    // Follow the actual native controller, not an assumed intro
+                    // duration. Freeze at the next action menu after one turn.
+                    unsigned controller = core->busRead32(core, controllers) & ~1u;
+                    if (!actionStarted)
+                    {
+                        if (controller == chooseAction)
+                        {
+                            if (!actionAge) actionAge = age;
+                            if (scene >= 55 && age - actionAge == 180)
+                            {
+                                keys = 1;
+                                actionStarted = 1;
+                            }
+                        }
+                        else if (age % 60 < 2) keys = 1;
+                    }
+                    else if (!moveChosen)
+                    {
+                        if (controller == chooseMove)
+                        {
+                            if (!moveAge) moveAge = age;
+                            if ((scene == 55 || scene == 58 || scene == 59) && age - moveAge == 180) keys = 8;
+                            if (age - moveAge == 360)
+                            {
+                                keys = 1;
+                                moveChosen = 1;
+                            }
+                        }
+                        else if (age % 60 < 2) keys = 1;
+                    }
+                    else if (controller != chooseAction && controller != chooseMove && age % 60 < 2) keys = 1;
                 }
                 if (scene == 31 && age >= 180 && age % 60 < 2)
                     keys = 1;

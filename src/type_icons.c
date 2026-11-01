@@ -204,7 +204,9 @@ const struct OamData sOamData_TypeIcons =
 const struct CompressedSpriteSheet sSpriteSheet_TypeIcons2 =
 {
     .data = gBattleIcons_Gfx2,
-    .size = (8*16) * 9 / (IS_FRLG && GAME_VERSION == VERSION_FIRE_RED ? 2 : 1),
+    // Both source sheets have ten 8x16 frames, including a blank final frame
+    // in sheet 2. Reserve the entire decompressed stream, not just used types.
+    .size = IS_FRLG && GAME_VERSION == VERSION_FIRE_RED ? (8*16/2) * 10 : (8*16) * 9,
     .tag = TYPE_ICON_TAG_2,
 };
 
@@ -314,11 +316,20 @@ static void SpriteCB_HealthboxTypeIcons(struct Sprite *sprite)
             }
             sprite->data[4 + i] = type;
         }
-        // Compact side tabs: two vertically, third beside the lower badge.
-        // Follow the actual healthbox, including 2v1 coordinates and slides.
-        icon->x = healthbox->x + (IsOnPlayerSide(battler) ? -38 : 78)
-            + (i == 2 ? (IsOnPlayerSide(battler) ? -9 : 9) : 0);
-        icon->y = healthbox->y + (i == 0 ? 0 : 11);
+        // Player tabs sit above the gimmick trigger's 32x16 slide corridor.
+        // Align the right-flank tabs with the first box's left edge in doubles.
+        // Opponent tabs fit in the 25px gap between stacked healthboxes.
+        if (IsOnPlayerSide(battler))
+        {
+            icon->x = healthbox->x - 38 + 9 * ((s32)i - (s32)count + 1)
+                - (GetBattlerPosition(battler) == B_POSITION_PLAYER_RIGHT ? 12 : 0);
+            icon->y = healthbox->y - 8;
+        }
+        else
+        {
+            icon->x = healthbox->x + 78 + (i == 2 ? 9 : 0);
+            icon->y = healthbox->y + (i == 0 ? 0 : 11);
+        }
         icon->x2 = healthbox->x2;
         icon->y2 = healthbox->y2;
         icon->oam.priority = healthbox->oam.priority;
