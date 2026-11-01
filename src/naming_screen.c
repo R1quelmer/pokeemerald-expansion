@@ -261,7 +261,11 @@ static const struct WindowTemplate sWindowTemplates[WIN_COUNT + 1] =
         .tilemapTop = 6,
         .width = 17,
         .height = 2,
+#ifdef FIRERED
+        .paletteNum = 11,
+#else
         .paletteNum = 10,
+#endif
         .baseBlock = 0x030
     },
     [WIN_TEXT_ENTRY_BOX] = {
@@ -270,7 +274,11 @@ static const struct WindowTemplate sWindowTemplates[WIN_COUNT + 1] =
         .tilemapTop = 4,
         .width = 17,
         .height = 2,
+#ifdef FIRERED
+        .paletteNum = 11,
+#else
         .paletteNum = 10,
+#endif
         .baseBlock = 0x052
     },
     [WIN_BANNER] = {

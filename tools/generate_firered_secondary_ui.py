@@ -18,7 +18,7 @@ def generate(root, out, write_palette):
     write_palette(out / 'summary_selector.pal', selector)
 
     card = [NAVY, PANEL, RAISED, PANEL, BORDER, TEXT, BORDER, NAVY,
-            BLUE, BORDER, BLUE, BLUE, BORDER, SUBTEXT, PANEL, BLUE]
+            TEXT, BORDER, BLUE, BLUE, BORDER, BORDER, PANEL, BLUE]
     for name in ['blue', 'green', 'bronze', 'silver', 'gold']:
         colors = read(f'graphics/trainer_card/frlg/{name}.pal')
         colors[:16] = card
@@ -73,7 +73,7 @@ def generate(root, out, write_palette):
         write_palette(out / f'{target}.pal', colors)
     # Sprite labels keep bright slot 1 independently of the old white BG.
     write_palette(out / 'dex_interface.pal', [NAVY, TEXT, BLUE, PANEL, RAISED,
-        BORDER, NAVY, BORDER, NAVY, PANEL, CYAN, CYAN, RAISED, BORDER, SUBTEXT, TEXT])
+        BORDER, NAVY, BORDER, NAVY, PANEL, CYAN, CYAN, RAISED, BORDER, SUBTEXT, NAVY])
     colors = read('graphics/pokedex/search_menu.pal')
     for start in range(0, len(colors), 16):
         colors[start:start + 16] = [NAVY, PANEL, PANEL, PANEL, TEXT, BORDER, NAVY,

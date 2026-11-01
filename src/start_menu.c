@@ -539,10 +539,10 @@ static bool32 InitStartMenuStep(void)
 #ifdef FIRERED
         if (sNumStartMenuActions <= 7)
         {
-            static const u8 colors[] = {15, 1, 15};
+            static const u8 colors[] = {14, 2, 14};
             u8 window = GetStartMenuWindowId();
-            FillWindowPixelRect(window, 15, 0, 0, 72, 14);
-            FillWindowPixelRect(window, 13, 0, 0, 3, 14);
+            FillWindowPixelRect(window, PIXEL_FILL(14), 0, 0, 72, 14);
+            FillWindowPixelRect(window, PIXEL_FILL(4), 0, 0, 3, 14);
             AddTextPrinterParameterized3(window, FONT_SMALL, 8, 1, colors, TEXT_SKIP_DRAW, COMPOUND_STRING("MENU"));
         }
 #endif

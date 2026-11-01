@@ -146,7 +146,7 @@ bool8 TryInitFireRedVisualQA(void)
         const u8 levels[] = {1, 9, 10, 99, 100, 100};
         for (u32 i = 0; i < PARTY_SIZE; i++)
             CreateMonWithIVs(&gParties[B_TRAINER_PLAYER][i], edgeSpecies[i], levels[i], 0, OTID_STRUCT_PLAYER_ID, 31);
-        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_NICKNAME, COMPOUND_STRING("WWWWWWWWWW"));
+        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_NICKNAME, COMPOUND_STRING("WWWWWWWWWWWW"));
         u16 hp = 0, item = ITEM_CHARIZARDITE_X;
         u32 status = STATUS1_PARALYSIS;
         SetMonData(&gParties[B_TRAINER_PLAYER][1], MON_DATA_STATUS, &status);
@@ -158,7 +158,7 @@ bool8 TryInitFireRedVisualQA(void)
         u8 ability = 1;
         CreateMonWithIVs(&gParties[B_TRAINER_PLAYER][0], SPECIES_KINGAMBIT, 100, 0, OTID_STRUCT_PLAYER_ID, 31);
         SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_ABILITY_NUM, &ability);
-        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_NICKNAME, COMPOUND_STRING("WWWWWWWWWW"));
+        SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_NICKNAME, COMPOUND_STRING("WWWWWWWWWWWW"));
         SetMonData(&gParties[B_TRAINER_PLAYER][0], MON_DATA_OT_NAME, COMPOUND_STRING("WWWWWWW"));
         SetMonMoveSlot(&gParties[B_TRAINER_PLAYER][0], MOVE_LIGHT_THAT_BURNS_THE_SKY, 0);
         SetMonMoveSlot(&gParties[B_TRAINER_PLAYER][0], MOVE_10_000_000_VOLT_THUNDERBOLT, 1);
@@ -230,7 +230,7 @@ bool8 TryInitFireRedVisualQA(void)
     case 6: case 43: ShowPlayerTrainerCard(ReturnFromVisualQA); break;
     case 7: DoNamingScreen(NAMING_SCREEN_PLAYER, gSaveBlock2Ptr->playerName, 0, 0, 0, ReturnFromVisualQA); break;
     case 38:
-        StringCopy(sVisualQaNickname, COMPOUND_STRING("WWWWWWWWWW"));
+        StringCopy(sVisualQaNickname, COMPOUND_STRING("WWWWWWWWWWWW"));
         DoNamingScreen(NAMING_SCREEN_NICKNAME, sVisualQaNickname,
             SPECIES_TREECKO, MON_MALE, 0, ReturnFromVisualQA); break;
     case 44:

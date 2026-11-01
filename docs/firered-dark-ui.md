@@ -88,3 +88,17 @@ Scenes 43/44 additionally check a maximum-length trainer name, 999:59 time,
 maximum money, all badges, the female card and a full box name. Scene 41 now
 advances through wild-battle text into commands and the move list. The next
 emulator pass must approve these corrections before final delivery.
+
+## Third emulator pass (5aa941a)
+
+Run 41264307441 captured 45 scenes successfully. EXPERIENCE and EFFECT headers
+now remain complete, and the selected 10,000,000 Volt Thunderbolt name fits its
+header while the list uses deliberate ellipses. Full storage, held item rows,
+999:59 time, maximum money, all badges and the real Poliwhirl scene fit. The
+normal battle reaches commands and move selection. The next palette adjustment
+separates Naming input (standard text palette 11) from keyboard glyph palette
+10; uses Trainer Card title ink slot 8; preserves dark shadows for Dex OBJ
+labels; and gives Pause's MENU text the correct light foreground. Pause fills
+now use PIXEL_FILL, rather than a single low nibble. Wide nickname fixtures
+use the project's full 12-character limit. The shop driver now advances the
+quantity prompt before capturing and cancelling the actual Yes/No prompt.
