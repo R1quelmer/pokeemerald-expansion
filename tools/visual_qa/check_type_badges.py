@@ -42,16 +42,19 @@ for scene in (53, 54):
 before = require(55, 0, (11, 3))
 after = require(55, 0, (11, 17))             # Real Charizard X Mega evolution.
 assert min(row["age"] for row in before) < min(row["age"] for row in after)
-assert any(row["state8"] for row in after), "Mega gimmick never activated"
+assert any(row["state8"] == 1 for row in after), "Mega gimmick never activated"
+assert {row["state4"] for row in before}.isdisjoint({row["state4"] for row in after}), "Mega species did not change"
 require(56, 1, (13, 4))
 require(56, 1, (12,))                       # Soak removes both old badges.
 require(57, 0, (1,))
 require(57, 0, (8,))                        # Protean: Normal -> Ghost.
 require(58, 0, (13, 4))
 water = require(58, 0, (12,))               # Tera Water is the defensive type.
-assert any(row["state8"] for row in water), "Tera gimmick never activated"
+assert any(row["state8"] == 5 for row in water), "Tera gimmick never activated"
 stellar = require(59, 0, (13, 4))
-assert any(row["state8"] for row in stellar), "Stellar Tera never activated"
+assert any(row["state8"] == 5 for row in stellar), "Stellar Tera never activated"
 require(60, 1, (11, 3, 13))                 # Forest's Curse adds a third type.
-require(61, 0, (11,))                       # Roost temporarily removes Flying.
+roost = require(61, 0, (11,))               # Roost temporarily removes Flying.
+restored = require(61, 0, (11, 3))
+assert max(row["age"] for row in restored) > min(row["age"] for row in roost), "Roost never restored Flying"
 print("Type badges: mono/dual, four battlers, Mega, Soak, Protean, Tera, Stellar, third type and Roost passed.")

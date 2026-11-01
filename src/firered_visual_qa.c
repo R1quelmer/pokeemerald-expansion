@@ -77,6 +77,10 @@ static void ReturnFromVisualQA(void)
 
 static void StartTypeBadgeBattle(u8 scene)
 {
+    // High-level fixtures must obey the player instead of taking a nap.
+    // This is a fresh QA save, not a progression change in production.
+    for (u32 flag = FLAG_BADGE01_GET; flag <= FLAG_BADGE08_GET; flag++)
+        FlagSet(flag);
     enum Species playerSpecies = SPECIES_TREECKO, enemySpecies = SPECIES_VENUSAUR;
     u16 item = ITEM_NONE;
     u8 level = scene == 53 ? 100 : 50;

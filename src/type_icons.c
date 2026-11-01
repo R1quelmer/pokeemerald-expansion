@@ -327,8 +327,8 @@ static void SpriteCB_HealthboxTypeIcons(struct Sprite *sprite)
         }
         else
         {
-            icon->x = healthbox->x + 78 + (i == 2 ? 9 : 0);
-            icon->y = healthbox->y + (i == 0 ? 0 : 11);
+            icon->x = healthbox->x + 68 + (i == 2 ? 9 : 0);
+            icon->y = healthbox->y - 4 + (i == 0 ? 0 : 11);
         }
         icon->x2 = healthbox->x2;
         icon->y2 = healthbox->y2;
