@@ -24,7 +24,11 @@
 
 #if IS_FRLG
 
+#ifdef FIRERED
+#define INTRO_SPECIES SPECIES_POLIWHIRL
+#else
 #define INTRO_SPECIES SPECIES_NIDORAN_F
+#endif
 
 enum
 {
