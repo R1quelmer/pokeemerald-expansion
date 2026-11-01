@@ -67,10 +67,9 @@ int main(int argc, char **argv)
                 if (scene == 37)
                 {
                     if (age == 420 || age == 421 || age == 840 || age == 841
-                        || age == 1020 || age == 1021) keys = 1;
+                        || age == 1020 || age == 1021 || age == 1200 || age == 1201) keys = 1;
                     if (age == 660 || age == 661) keys = 128;
-                    if (age == 1200 || age == 1201 || age == 1500 || age == 1501
-                        || age == 1700 || age == 1701) keys = 2;
+                    if (age == 1650 || age == 1651 || age == 1900 || age == 1901) keys = 2;
                 }
                 if (scene == 38)
                 {
