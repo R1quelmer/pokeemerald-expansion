@@ -34,6 +34,7 @@
 
 EWRAM_DATA u8 gVisualQaScene = 0;
 EWRAM_DATA volatile u32 gVisualQaProgress = 0;
+EWRAM_DATA volatile u32 gVisualQaBattleState[12] = {0};
 static EWRAM_DATA u8 sVisualQaNickname[POKEMON_NAME_LENGTH + 1];
 static bool8 sPrepared;
 void FireRedVisualQA_OpenStorage(void);
@@ -72,6 +73,85 @@ static void ReturnFromVisualQA(void)
 {
     // Stay in the selected scene on a fresh boot; never write a save file.
     SetMainCallback2(CB2_InitOptionMenu);
+}
+
+static void StartTypeBadgeBattle(u8 scene)
+{
+    enum Species playerSpecies = SPECIES_TREECKO, enemySpecies = SPECIES_VENUSAUR;
+    u16 item = ITEM_NONE;
+    u8 level = scene == 53 ? 100 : 50;
+    u8 ability = 0, teraType = scene == 59 ? TYPE_STELLAR : TYPE_WATER;
+    enum Move playerMove = MOVE_CELEBRATE, enemyMove = MOVE_CELEBRATE;
+    if (scene == 52 || scene == 55)
+        playerSpecies = SPECIES_CHARIZARD;
+    if (scene == 52)
+        enemySpecies = SPECIES_GENGAR;
+    if (scene == 53 || scene == 54 || scene == 58 || scene == 59)
+        playerSpecies = SPECIES_VENUSAUR;
+    if (scene == 55)
+    {
+        item = ITEM_CHARIZARDITE_X;
+        enemySpecies = SPECIES_WOBBUFFET;
+    }
+    if (scene == 56)
+    {
+        playerSpecies = SPECIES_GOLDUCK;
+        playerMove = MOVE_SOAK;
+    }
+    if (scene == 57)
+    {
+        playerSpecies = SPECIES_KECLEON;
+        ability = 2; // Protean (hidden ability).
+        playerMove = MOVE_SHADOW_SNEAK;
+        enemySpecies = SPECIES_WOBBUFFET;
+    }
+    if (scene == 60)
+    {
+        playerSpecies = SPECIES_TREVENANT;
+        playerMove = MOVE_FORESTS_CURSE;
+        enemySpecies = SPECIES_CHARIZARD;
+    }
+    if (scene == 61)
+    {
+        playerSpecies = SPECIES_CHARIZARD;
+        playerMove = MOVE_ROOST;
+    }
+    ZeroPlayerPartyMons();
+    ZeroEnemyPartyMons();
+    for (u32 trainer = 0; trainer < MAX_BATTLE_TRAINERS; trainer++)
+    {
+        ZeroMonData(&gParties[trainer][0]);
+        CreateMonWithIVs(&gParties[trainer][0], trainer == B_TRAINER_PLAYER ? playerSpecies
+            : trainer == B_TRAINER_PARTNER ? SPECIES_CORVIKNIGHT : enemySpecies,
+            level, 0, OTID_STRUCT_PLAYER_ID, 31);
+        SetMonMoveSlot(&gParties[trainer][0], trainer == B_TRAINER_PLAYER ? playerMove : enemyMove, 0);
+        for (u32 slot = 1; slot < MAX_MON_MOVES; slot++)
+            SetMonMoveSlot(&gParties[trainer][0], MOVE_NONE, slot);
+        CreateMonWithIVs(&gParties[trainer][1], trainer == B_TRAINER_PLAYER ? SPECIES_CORVIKNIGHT : SPECIES_CLEFABLE,
+            level, 0, OTID_STRUCT_PLAYER_ID, 31);
+        SetMonMoveSlot(&gParties[trainer][1], MOVE_CELEBRATE, 0);
+        gPartiesCount[trainer] = 2;
+    }
+    struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][0];
+    SetMonData(mon, MON_DATA_HELD_ITEM, &item);
+    SetMonData(mon, MON_DATA_ABILITY_NUM, &ability);
+    SetMonData(mon, MON_DATA_TERA_TYPE, &teraType);
+    if (scene == 53)
+    {
+        u32 status = STATUS1_POISON;
+        SetMonData(mon, MON_DATA_NICKNAME, COMPOUND_STRING("WWWWWWWWWWWW"));
+        SetMonData(mon, MON_DATA_STATUS, &status);
+    }
+    if (scene == 61)
+    {
+        u16 hp = GetMonData(mon, MON_DATA_MAX_HP) / 2;
+        SetMonData(mon, MON_DATA_HP, &hp);
+    }
+    if (scene == 58 || scene == 59)
+        AddBagItem(ITEM_TERA_ORB, 1);
+    gBattleTypeFlags = scene == 53 ? BATTLE_TYPE_DOUBLE : scene == 54
+        ? BATTLE_TYPE_DOUBLE | BATTLE_TYPE_MULTI | BATTLE_TYPE_INGAME_PARTNER : 0;
+    SetMainCallback2(CB2_InitBattle);
 }
 
 bool8 TryInitFireRedVisualQA(void)
@@ -207,6 +287,7 @@ bool8 TryInitFireRedVisualQA(void)
     gVisualQaProgress = 20 + scene;
     switch (scene)
     {
+    case 51 ... 61: StartTypeBadgeBattle(scene); break;
     case 1: SetMainCallback2(CB2_InitOptionMenu); break;
     case 2: FireRedVisualQA_OpenPartyLayout(PARTY_LAYOUT_SINGLE, ReturnFromVisualQA); break;
     case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 26: case 32:

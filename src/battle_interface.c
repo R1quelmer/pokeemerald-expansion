@@ -34,6 +34,7 @@
 #include "constants/songs.h"
 #include "constants/items.h"
 #include "caps.h"
+#include "type_icons.h"
 
 #define HEALTHBOX_BG_INDEX 2
 
@@ -697,6 +698,9 @@ u8 CreateBattlerHealthboxSprites(enum BattlerId battler)
     healthBarSpritePtr->invisible = TRUE;
 
     CreateIndicatorSprite(battler);
+#ifdef FIRERED
+    CreateHealthboxTypeIcons(battler, healthboxLeftSpriteId);
+#endif
 
     gBattleStruct->ballSpriteIds[0] = MAX_SPRITES;
     gBattleStruct->ballSpriteIds[1] = MAX_SPRITES;

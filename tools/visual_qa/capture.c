@@ -10,13 +10,14 @@
 
 int main(int argc, char **argv)
 {
-    if (argc != 8) return 2;
+    if (argc != 8 && argc != 9) return 2;
     unsigned address = strtoul(argv[3], NULL, 16);
     unsigned progressAddress = strtoul(argv[4], NULL, 16);
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 50; ++scene)
+    unsigned typeStateAddress = argc == 9 ? strtoul(argv[8], NULL, 16) : 0;
+    for (unsigned scene = 0; scene <= 61; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -28,7 +29,8 @@ int main(int argc, char **argv)
         core->setVideoBuffer(core, pixels, 256);
         core->reset(core);
         unsigned readyFrame = 0;
-        unsigned frameCount = scene == 10 ? 12000 : scene == 31 ? 10000 : scene == 39 ? 4800 : 2800;
+        unsigned frameCount = scene >= 55 ? 10000 : scene >= 51 ? 4000
+            : scene == 10 ? 12000 : scene == 31 ? 10000 : scene == 39 ? 4800 : 2800;
         for (unsigned frame = 0; frame < frameCount; ++frame)
         {
             /* Copyright/intro/title advance with START, then fixture launch.
@@ -43,6 +45,12 @@ int main(int argc, char **argv)
                 if (!readyFrame) readyFrame = frame;
                 unsigned age = frame - readyFrame;
                 unsigned keys = 0;
+                if (scene >= 55)
+                {
+                    if (age == 1500 || age == 1501 || age == 2100 || age == 2101) keys = 1;
+                    if ((scene == 55 || scene == 58 || scene == 59) && (age == 1800 || age == 1801)) keys = 8;
+                    if (age >= 5000 && age % 600 < 2) keys = 1;
+                }
                 if (scene == 31 && age >= 180 && age % 60 < 2)
                     keys = 1;
                 if (scene == 33)
@@ -188,7 +196,7 @@ int main(int argc, char **argv)
                 || (scene == 30 && readyFrame && frame - readyFrame == 100)
                 || (scene == 31 && frame >= 600 && frame % 60 == 0)
                 || (scene >= 32 && readyFrame && frame - readyFrame >= 300
-                    && (frame - readyFrame) % 60 == 30)
+                    && (frame - readyFrame) % (scene >= 55 ? 15 : 60) == (scene >= 55 ? 0 : 30))
                 || (scene == 10 && frame >= 300 && frame % 60 == 0)
                 || (scene == 10 && frame >= 1400 && frame <= 2600 && frame % 15 == 0)
                 || (scene >= 11 && scene <= 17 && readyFrame && frame - readyFrame >= 360
@@ -209,10 +217,14 @@ int main(int argc, char **argv)
                 file->close(file);
                 uint32_t pc = 0;
                 core->readRegister(core, "r15", &pc);
-                printf("scene=%u frame=%u age=%u progress=%u callback2=%08x pc=%08x flags=%08x outcome=%u\n",
+                printf("scene=%u frame=%u age=%u progress=%u callback2=%08x pc=%08x flags=%08x outcome=%u",
                     scene, frame, readyFrame ? frame - readyFrame : 0, core->busRead32(core, progressAddress),
                     core->busRead32(core, mainAddress + 4), pc,
                     core->busRead32(core, flagsAddress), core->busRead8(core, outcomeAddress));
+                if (typeStateAddress)
+                    for (unsigned word = 0; word < 12; word++)
+                        printf(" state%u=%08x", word, core->busRead32(core, typeStateAddress + 4 * word));
+                printf("\n");
             }
         }
         if (scene != 0 && !(core->busRead8(core, address) & 0x80))
