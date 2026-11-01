@@ -44,6 +44,9 @@
 #include "text.h"
 #include "tv.h"
 #include "window.h"
+#ifdef FIRERED
+#include "firered_ui.h"
+#endif
 #include "constants/battle_move_effects.h"
 #include "constants/items.h"
 #include "constants/moves.h"
@@ -184,6 +187,9 @@ static EWRAM_DATA struct PokemonSummaryScreenData
     u8 bgDisplayOrder; // Determines the order page backgrounds are loaded while scrolling between them
     bool8 hasRelearnableMoves;
     u8 windowIds[8];
+#ifdef FIRERED
+    u8 headerWindows[4];
+#endif
     u8 spriteIds[SPRITE_ARR_ID_COUNT];
     s16 switchCounter; // Used for various switch statement cases that decompress/load graphics or Pokémon data
     u8 unk_filler4[6];
@@ -244,6 +250,10 @@ static void DrawExperienceProgressBar(struct Pokemon *);
 static void DrawContestMoveHearts(enum Move move);
 static void LimitEggSummaryPageDisplay(void);
 static void ResetWindows(void);
+#ifdef FIRERED
+static void DrawFireRedSummaryHeaders(u8 page);
+static void ClearFireRedSummaryHeaders(void);
+#endif
 static void PrintMonInfo(void);
 static void PrintNotEggInfo(void);
 static void PrintEggInfo(void);
@@ -1464,7 +1474,14 @@ static bool8 DecompressGraphics(void)
         break;
     case 6:
         LoadPalette(gSummaryScreen_Pal, BG_PLTT_ID(0), 8 * PLTT_SIZE_4BPP);
+#ifdef FIRERED
+        {
+            static const u16 ppPalette[] = INCGFX_U16("graphics/ui/firered/summary_pp.pal", ".gbapal");
+            LoadPalette(ppPalette, BG_PLTT_ID(8), sizeof(ppPalette));
+        }
+#else
         LoadPalette(&gPPTextPalette, BG_PLTT_ID(8) + 1, PLTT_SIZEOF(16 - 1));
+#endif
         sMonSummaryScreen->switchCounter++;
         break;
     case 7:
@@ -3138,11 +3155,86 @@ static void LimitEggSummaryPageDisplay(void) // If the Pokémon is an egg, limit
         ChangeBgX(3, 0, BG_COORD_SET);
 }
 
+#ifdef FIRERED
+// Separate 8px headers on BG0. Their content windows start on the next tile row.
+// 80 reserved tiles at 0x350..0x39f follow the relearn prompt (800..821).
+static void ClearFireRedSummaryHeaders(void)
+{
+    for (u32 i = 0; i < ARRAY_COUNT(sMonSummaryScreen->headerWindows); i++)
+    {
+        u8 window = sMonSummaryScreen->headerWindows[i];
+        if (window != WINDOW_NONE)
+        {
+            ClearWindowTilemap(window);
+            RemoveWindow(window);
+            sMonSummaryScreen->headerWindows[i] = WINDOW_NONE;
+        }
+    }
+}
+
+static void DrawFireRedSummaryHeaders(u8 page)
+{
+    struct Header {u8 x, y, width; const u8 *label;};
+    const struct Header info[] = {
+        {11, 3, 18, COMPOUND_STRING("PROFILE")},
+        {11, 8, 18, COMPOUND_STRING("ABILITY")},
+        {11, 13, 18, COMPOUND_STRING("TRAINER INFO")},
+    };
+    const struct Header skills[] = {
+        {10, 3, 10, COMPOUND_STRING("ITEM")},
+        {20, 3, 10, COMPOUND_STRING("RIBBONS")},
+        {10, 6, 20, COMPOUND_STRING("STATS")},
+        {10, 13, 20, COMPOUND_STRING("EXPERIENCE")},
+    };
+    const struct Header moves[] = {
+        {10, 3, 20, COMPOUND_STRING("MOVES")},
+        {0, 14, 10, COMPOUND_STRING("EFFECT")},
+        {10, 14, 20, COMPOUND_STRING("DESCRIPTION")},
+    };
+    const struct Header *headers = page == PSS_PAGE_INFO ? info : page == PSS_PAGE_SKILLS ? skills : moves;
+    u32 count = page == PSS_PAGE_SKILLS ? 4 : 3;
+    static const u8 colors[] = {0, 7, 0};
+    static const u8 valueColors[] = {0, 3, 0};
+    for (u32 i = 0; i < count; i++)
+    {
+        u8 window = sMonSummaryScreen->headerWindows[i];
+        if (window == WINDOW_NONE)
+        {
+            struct WindowTemplate template = {
+                .bg = 0, .tilemapLeft = headers[i].x, .tilemapTop = headers[i].y,
+                .width = headers[i].width, .height = 1, .paletteNum = 6,
+                .baseBlock = 0x350 + i * 20,
+            };
+            window = AddWindow(&template);
+            sMonSummaryScreen->headerWindows[i] = window;
+        }
+        FillWindowPixelBuffer(window, PIXEL_FILL(0));
+        const u8 *label = headers[i].label;
+        if (page == PSS_PAGE_INFO && i == 1 && sMonSummaryScreen->summary.isEgg)
+            label = COMPOUND_STRING("HATCH STATUS");
+        AddTextPrinterParameterized3(window, FONT_SMALL_NARROW, 2, 0, colors, TEXT_SKIP_DRAW, label);
+        if (page == PSS_PAGE_INFO && i == 1 && !sMonSummaryScreen->summary.isEgg)
+        {
+            enum Ability ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
+            const u8 *name = gAbilitiesInfo[ability].name;
+            u8 font = GetFontIdToFit(name, FONT_SMALL_NARROW, 0, 100);
+            u32 x = GetStringRightAlignXOffset(font, name, headers[i].width * 8 - 2);
+            AddTextPrinterParameterized3(window, font, x, 0, valueColors, TEXT_SKIP_DRAW, name);
+        }
+        PutWindowTilemap(window);
+        CopyWindowToVram(window, COPYWIN_FULL);
+    }
+}
+#endif
+
 static void ResetWindows(void)
 {
     u8 i;
 
     InitWindows(sSummaryTemplate);
+#ifdef FIRERED
+    memset(sMonSummaryScreen->headerWindows, WINDOW_NONE, sizeof(sMonSummaryScreen->headerWindows));
+#endif
     DeactivateAllTextPrinters();
     for (i = 0; i < PSS_LABEL_WINDOW_END; i++)
         FillWindowPixelBuffer(i, PIXEL_FILL(0));
@@ -3152,6 +3244,20 @@ static void ResetWindows(void)
 
 static void PrintTextOnWindowWithFont(u8 windowId, const u8 *string, u8 x, u8 y, u8 lineSpacing, u8 colorId, u32 fontId)
 {
+#ifdef FIRERED
+    if ((sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO
+         && (windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_INFO_ABILITY]
+             || windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_INFO_MEMO]))
+        || (IS_MOVE_PAGE(sMonSummaryScreen->currPageIndex)
+            && windowId == sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_MOVE_DESCRIPTION]))
+    {
+        u8 insetY = sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO ? 0 : y;
+        FireRedPrintParagraph(windowId, string, max(x, 2), insetY, sTextColors[colorId]);
+        return;
+    }
+    if (windowId == PSS_LABEL_WINDOW_MOVES_POWER_ACC)
+        fontId = FONT_SMALL;
+#endif
     AddTextPrinterParameterized4(windowId, fontId, x, y, 0, lineSpacing, sTextColors[colorId], 0, string);
 }
 
@@ -3300,6 +3406,9 @@ static void PrintPageNamesAndStats(void)
 
 static void PutPageWindowTilemaps(u8 page)
 {
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(page);
+#endif
     u8 i;
 
     ClearWindowTilemap(PSS_LABEL_WINDOW_POKEMON_INFO_TITLE);
@@ -3362,6 +3471,9 @@ static void PutPageWindowTilemaps(u8 page)
 
 static void ClearPageWindowTilemaps(u8 page)
 {
+#ifdef FIRERED
+    ClearFireRedSummaryHeaders();
+#endif
     u8 i;
 
     switch (page)
@@ -3434,6 +3546,9 @@ static void RemoveWindowByIndex(u8 windowIndex)
 
 static void PrintPageSpecificText(u8 pageIndex)
 {
+#ifdef FIRERED
+    DrawFireRedSummaryHeaders(pageIndex);
+#endif
     u16 i;
     for (i = 0; i < ARRAY_COUNT(sMonSummaryScreen->windowIds); i++)
     {
@@ -3526,14 +3641,24 @@ static void PrintMonOTID(void)
 
 static void PrintMonAbilityName(void)
 {
+#ifdef FIRERED
+    return; // The ability name is in the dedicated header, above the description.
+#else
     enum Ability ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
     PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilitiesInfo[ability].name, 0, 1, 0, 1);
+#endif
 }
 
 static void PrintMonAbilityDescription(void)
 {
     enum Ability ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
-    PrintTextOnWindowToFit(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilitiesInfo[ability].description, 0, 17, 0, 0);
+    PrintTextOnWindowToFit(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilitiesInfo[ability].description, 0,
+#ifdef FIRERED
+        0,
+#else
+        17,
+#endif
+        0, 0);
 }
 
 static void BufferMonTrainerMemo(void)

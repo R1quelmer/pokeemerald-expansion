@@ -18,6 +18,7 @@
 #include "battle.h"
 #include "save.h"
 #include "task.h"
+#include "oak_speech.h"
 #include "overworld.h"
 #include "field_screen_effect.h"
 #include "event_object_movement.h"
@@ -138,6 +139,7 @@ bool8 TryInitFireRedVisualQA(void)
     case 22: case 23: case 28: case 29:
         ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gParties[B_TRAINER_PLAYER], 0, PARTY_SIZE - 1, ReturnFromVisualQA); break;
     case 27: SetMainCallback2(CB2_ReinitMainMenu); break;
+    case 31: StartNewGameSceneFrlg(); break;
     case 30:
         FlagSet(FLAG_SYS_POKEMON_GET);
         SetWarpDestination(MAP_GROUP(MAP_PALLET_TOWN_PLAYERS_HOUSE_2F),

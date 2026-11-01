@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     unsigned mainAddress = strtoul(argv[5], NULL, 16);
     unsigned flagsAddress = strtoul(argv[6], NULL, 16);
     unsigned outcomeAddress = strtoul(argv[7], NULL, 16);
-    for (unsigned scene = 0; scene <= 30; ++scene)
+    for (unsigned scene = 0; scene <= 31; ++scene)
     {
         struct mCore *core = mCoreFind(argv[1]);
         if (!core || !core->init(core)) return 3;
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         core->setVideoBuffer(core, pixels, 256);
         core->reset(core);
         unsigned readyFrame = 0;
-        unsigned frameCount = scene == 10 ? 12000 : 2800;
+        unsigned frameCount = scene == 10 ? 12000 : scene == 31 ? 10000 : 2800;
         for (unsigned frame = 0; frame < frameCount; ++frame)
         {
             /* Copyright/intro/title advance with START, then fixture launch.
@@ -43,6 +43,8 @@ int main(int argc, char **argv)
                 if (!readyFrame) readyFrame = frame;
                 unsigned age = frame - readyFrame;
                 unsigned keys = 0;
+                if (scene == 31 && age >= 180 && age % 60 < 2)
+                    keys = 1;
                 if (scene == 10)
                 {
                     if (age >= 180 && age < 196) keys = 128; /* DOWN onto real map trigger */
@@ -104,7 +106,20 @@ int main(int argc, char **argv)
                 core->setKeys(core, keys);
             }
             core->runFrame(core);
+            if (scene == 30 && readyFrame && (frame - readyFrame == 100 || frame - readyFrame == 390))
+            {
+                char dumpPath[512];
+                snprintf(dumpPath, sizeof(dumpPath), "%s/pause-bg0-%u.bin", argv[2], frame - readyFrame);
+                FILE *dump = fopen(dumpPath, "wb");
+                if (!dump) return 7;
+                uint16_t bg0 = core->busRead16(core, 0x04000008);
+                uint32_t mapAddress = 0x06000000 + ((bg0 >> 8) & 31) * 0x800;
+                for (unsigned byte = 0; byte < 0x800; byte++)
+                    fputc(core->busRead8(core, mapAddress + byte), dump);
+                fclose(dump);
+            }
             if (frame == 1800 || frame == 2300 || frame == frameCount - 1
+                || (scene == 31 && frame >= 600 && frame % 60 == 0)
                 || (scene == 10 && frame >= 300 && frame % 60 == 0)
                 || (scene == 10 && frame >= 1400 && frame <= 2600 && frame % 15 == 0)
                 || (scene >= 11 && scene <= 17 && readyFrame && frame - readyFrame >= 360

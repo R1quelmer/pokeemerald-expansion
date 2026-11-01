@@ -824,7 +824,7 @@ static void Task_DisplayMainMenu(u8 taskId)
         // Note: If there is no save file, the save block is zeroed out,
         // so the default gender is MALE.
 #ifdef FIRERED
-        palette = RGB(4, 4, 5);
+        palette = RGB(29, 30, 31);
         LoadPalette(&palette, BG_PLTT_ID(15) + 1, PLTT_SIZEOF(1));
 #else
         if (gSaveBlock2Ptr->playerGender == MALE)
@@ -837,6 +837,10 @@ static void Task_DisplayMainMenu(u8 taskId)
             palette = RGB(31, 3, 21);
             LoadPalette(&palette, BG_PLTT_ID(15) + 1, PLTT_SIZEOF(1));
         }
+#endif
+
+#ifdef FIRERED
+        LoadPalette(sMainMenuTextPal, BG_PLTT_ID(15), sizeof(sMainMenuTextPal));
 #endif
 
         switch (gTasks[taskId].tMenuType)

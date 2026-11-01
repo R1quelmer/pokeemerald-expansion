@@ -852,15 +852,9 @@ static void BagMenu_InitBGs(void)
 #ifdef FIRERED
 static void UpdateFireRedBagAccent(void)
 {
-    static const u16 accents[POCKETS_COUNT] = {
-        [POCKET_ITEMS] = RGB(29,20,5),
-        [POCKET_POKE_BALLS] = RGB(6,21,28),
-        [POCKET_TM_HM] = RGB(14,10,23),
-        [POCKET_BERRIES] = RGB(6,24,14),
-        [POCKET_KEY_ITEMS] = RGB(24,5,8),
-    };
-    u16 accent = accents[gBagPosition.pocket];
-    LoadPalette(&accent, BG_PLTT_ID(0) + 4, PLTT_SIZEOF(1));
+    const u16 panel = RGB(3, 6, 10);
+    const u16 accent = RGB(8, 24, 30);
+    LoadPalette(&panel, BG_PLTT_ID(0) + 4, PLTT_SIZEOF(1));
     LoadPalette(&accent, BG_PLTT_ID(1) + 4, PLTT_SIZEOF(1));
 }
 #endif

@@ -157,7 +157,7 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
 };
 
 #ifdef FIRERED
-static const u16 sOptionMenuBg_Pal[] = {RGB(4, 4, 5)};
+static const u16 sOptionMenuBg_Pal[] = {RGB(1, 2, 4)};
 #else
 static const u16 sOptionMenuBg_Pal[] = {RGB(17, 18, 31)};
 #endif
@@ -650,7 +650,7 @@ static void ButtonMode_DrawChoices(u8 selection)
 static void DrawHeaderText(void)
 {
 #ifdef FIRERED
-    static const u8 colors[] = {8, 1, 8};
+    static const u8 colors[] = {8, 2, 8};
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(8));
     FillWindowPixelRect(WIN_HEADER, 9, 0, 14, 208, 2);
     AddTextPrinterParameterized3(WIN_HEADER, FONT_NORMAL, 8, 1, colors, TEXT_SKIP_DRAW, gText_Option);

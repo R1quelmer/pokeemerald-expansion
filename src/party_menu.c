@@ -974,7 +974,7 @@ static bool8 AllocPartyMenuBgGfx(void)
 #ifdef FIRERED
         if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
         {
-            const u16 backdrop = RGB(4, 4, 5);
+            const u16 backdrop = RGB(1, 2, 4);
             LoadPalette(&backdrop, 0, PLTT_SIZEOF(1));
         }
 #endif
@@ -2685,12 +2685,12 @@ static void LoadPartyBoxPalette(struct PartyMenuBox *menuBox, u8 palFlags)
 #ifdef FIRERED
     if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
     {
-        const u16 textColors[] = {RGB(4, 4, 5), RGB(31, 31, 31)};
-        u16 face = (palFlags & PARTY_PAL_FAINTED) ? RGB(8, 4, 6) : RGB(5, 5, 6);
-        u16 accent = (palFlags & PARTY_PAL_SELECTED) ? RGB(24, 5, 8) : RGB(12, 12, 14);
+        const u16 textColors[] = {RGB(2, 4, 8), RGB(29, 30, 31)};
+        u16 face = (palFlags & PARTY_PAL_FAINTED) ? RGB(3, 4, 7) : RGB(2, 4, 7);
+        u16 accent = (palFlags & PARTY_PAL_SELECTED) ? RGB(8, 24, 30) : RGB(5, 9, 14);
         if (palFlags & (PARTY_PAL_SWITCHING | PARTY_PAL_TO_SWITCH | PARTY_PAL_TO_SOFTBOIL))
-            accent = RGB(29, 20, 5);
-        const u16 borderColors[] = {RGB(4, 4, 5), accent, RGB(28, 28, 29)};
+            accent = RGB(5, 14, 23);
+        const u16 borderColors[] = {RGB(1, 2, 4), accent, RGB(5, 9, 14)};
         const u16 faceColors[] = {face, face};
         LoadPalette(&face, palOffset + 1, PLTT_SIZEOF(1));
         LoadPalette(textColors, palOffset + 2, sizeof(textColors));
@@ -2719,7 +2719,12 @@ static void DisplayPartyPokemonNickname(struct Pokemon *mon, struct PartyMenuBox
         if (c == 1)
             menuBox->infoRects->blitFunc(menuBox->windowId, menuBox->infoRects->dimensions[0] >> 3, menuBox->infoRects->dimensions[1] >> 3, menuBox->infoRects->dimensions[2] >> 3, menuBox->infoRects->dimensions[3] >> 3, FALSE);
         GetMonNickname(mon, nickname);
-        DisplayPartyPokemonBarDetailToFit(menuBox->windowId, nickname, 0, menuBox->infoRects->dimensions, 50);
+        DisplayPartyPokemonBarDetailToFit(menuBox->windowId, nickname, 0, menuBox->infoRects->dimensions,
+#ifdef FIRERED
+            gPartyMenu.layout == PARTY_LAYOUT_SINGLE ? 64 : 50);
+#else
+            50);
+#endif
     }
 }
 
@@ -2801,6 +2806,20 @@ static void DisplayParty4DigitsHP(struct PartyMenuBox *menuBox, const u8 *str, c
 
 static void DisplayPartyPokemonHP(u16 hp, u16 maxhp, struct PartyMenuBox *menuBox)
 {
+#ifdef FIRERED
+    if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
+    {
+        u8 text[12];
+        u8 *end = ConvertIntToDecimalStringN(text, hp, STR_CONV_MODE_LEFT_ALIGN, 5);
+        *end++ = CHAR_SLASH;
+        ConvertIntToDecimalStringN(end, maxhp, STR_CONV_MODE_LEFT_ALIGN, 5);
+        u8 font = GetFontIdToFit(text, FONT_SMALL, 0, 52);
+        FillWindowPixelRect(menuBox->windowId, 1, 56, 13, 54, 12);
+        AddTextPrinterParameterized3(menuBox->windowId, font,
+            GetStringRightAlignXOffset(font, text, 108), 13, sFontColorTable[0], 0, text);
+        return;
+    }
+#endif
     bool32 fourDigits = (maxhp >= 1000);
     u8 *strOut = ConvertIntToDecimalStringN(gStringVar1, hp, STR_CONV_MODE_RIGHT_ALIGN, fourDigits ? 4 : 3);
 
@@ -2815,6 +2834,10 @@ static void DisplayPartyPokemonHP(u16 hp, u16 maxhp, struct PartyMenuBox *menuBo
 
 static void DisplayPartyPokemonMaxHPCheck(struct Pokemon *mon, struct PartyMenuBox *menuBox, u8 c)
 {
+#ifdef FIRERED
+    if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
+        return; // The grid redraws current/max together, including their separator.
+#endif
     if (GetMonData(mon, MON_DATA_SPECIES) != SPECIES_NONE)
     {
         if (c != 0)
